@@ -680,7 +680,7 @@ const showAlert = (variant, title, message) => {
 
     if (!selectedvoice) {
       setMessage("No file selected to delete.");
-      setAlert({ variant: "warning", title: "Select File", message: "No file selected to delete." });
+      showAlert({ variant: "warning", title: "Select File", message: "No file selected to delete." });
       // console.error("Missing selectedvoice");
       return;
     }
@@ -696,14 +696,14 @@ const showAlert = (variant, title, message) => {
           voice_id: selectedvoice, // Add the voice_id in the body
         },
       });
-      setAlert({ variant: "success", title: "success", message: "Voice memo deleted successfully." });
+      showAlert({ variant: "success", title: "success", message: "Voice memo deleted successfully." });
 
       fetchAudioFiles();
       setDeletebutton(false);
     } catch (error) {
       // console.error("Error response:", error.response || error);
       // setMessage(error.response?.data?.message || "Error deleting file.");
-      setAlert({ variant: "failed", title: "Failed", message: error.response?.data?.message || "Error deleting file." });
+      showAlert({ variant: "failed", title: "Failed", message: error.response?.data?.message || "Error deleting file." });
     }
   };
 
@@ -772,11 +772,11 @@ const showAlert = (variant, title, message) => {
           },
         }
       );
-      setAlert({ variant: "success", title: "File Shared", message: " Voice memo has been shared successfully!" });
+      showAlert({ variant: "success", title: "File Shared", message: " Voice memo has been shared successfully!" });
       // Handle the response, if needed
       // console.log("File shared successfully:", response.data);
     } catch (error) {
-      setAlert({ variant: "error", title: "Sharing Failed", message: "Error sharing file:", error });
+      showAlert({ variant: "error", title: "Sharing Failed", message: "Error sharing file:", error });
       // console.error("Error sharing file:", error);
     } finally {
       hideLoading();
