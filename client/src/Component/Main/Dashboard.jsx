@@ -224,10 +224,12 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery, }) => {
   const [isDragOver, setIsDragOver] = useState(false);
 
   const [alert, setAlert] = useState(null);
+
+
   const showAlert = (variant, title, message) => {
     setAlert({ variant, title, message });
   
-    // Automatically remove alert after 5 seconds
+ 
     setTimeout(() => {
       setAlert(null);
     }, 3000);
@@ -1357,7 +1359,7 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery, }) => {
 
     if (!file_id) {
       // setMessage("No file selected to delete.");
-      setAlert({ variant: "warning", title: "Select File", message: "No File selected." });
+      showAlert({ variant: "warning", title: "Select File", message: "No File selected." });
       // console.error("Missing file_id");
 
       return;
@@ -1375,13 +1377,15 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery, }) => {
       );
 
       setFiles(files.filter((file) => file._id !== file_id));
-      setAlert({ variant: "success", title: "success", message: "File deleted successfully." });
+      setDeletebutton(false);
+      // setAlert( "success",  "success", "File deleted successfully." );
+      showAlert("success", "success", "File deleted successfully.");
       // console.log(response.data.message || "File deleted successfully.");
 
-      setDeletebutton(false);
+      // setDeletebutton(false);
     } catch (error) {
       // console.log(error.response?.data?.message || "Error deleting file.");
-      setAlert({ variant: "failed", title: "Failed", message: error.response?.data?.message || "Error deleting file." });
+      showAlert({ variant: "failed", title: "Failed", message: error.response?.data?.message || "Error deleting file." });
     }
   };
 
@@ -1671,7 +1675,7 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery, }) => {
   const shareFile = async (fileId) => {
 
     if (!selectedEmails.length) {
-      setAlert({ variant: "warning", title: "Please Select Email", message: "No designees selected" });
+      showAlert({ variant: "warning", title: "Please Select Email", message: "No designees selected" });
       // console.error("No designees selected.");
       return;
     }
@@ -1711,14 +1715,14 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery, }) => {
           },
         }
       );
-      setAlert({ variant: "success", title: "File Shared", message: "The file has been shared successfully!" });
+      showAlert({ variant: "success", title: "File Shared", message: "The file has been shared successfully!" });
       // Handle the response, if needed
       // console.log("File shared successfully:", response.data);
       // const [shareFolderModal, setShareFolderModal] = useState(false);
       setShareFolderModal(false);
       fetchFiles();
     } catch (error) {
-      setAlert({ variant: "error", title: "Sharing Failed", message: "An error occurred while sharing the file. Please try again." });
+      showAlert({ variant: "error", title: "Sharing Failed", message: "An error occurred while sharing the file. Please try again." });
 
       // console.error("Error sharing file:", error);
     }
