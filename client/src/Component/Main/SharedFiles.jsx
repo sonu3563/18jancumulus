@@ -1087,7 +1087,7 @@ const SharedFiles = () => {
                 <div onClick={handlesharedItem} className={`${sharedItem ? 'flex items-center md:gap-x-2 border-b-4 border-blue-600 text-blue-600' : 'flex items-center md:gap-x-2'}`}>
                   <span className="font-semibold cursor-pointer pb-2 mr-2">After life Sharing</span>
                   <span className="text-black rounded-lg text-sm mt-1 mb-2 px-2.5 bg-[#EEEEEF]">
-                    {afterfile?.length - 1 ?? 0}
+                  {afterfile.length}
                   </span>
 
                 </div>
