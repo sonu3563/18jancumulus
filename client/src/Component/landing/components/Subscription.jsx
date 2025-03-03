@@ -29,10 +29,10 @@ function CompareTable({ onClose }) {
     { feature: "Advanced Inheritance Options", plans: [false, true, true] },
     { feature: "Full Suite of Integrations", plans: [false, true, true] },
     { feature: "Automatic Photo Upload", plans: [false, true, true] },
-    { feature: "Priority Support", plans: [false, false, true] },
-    { feature: "Voice Memo", plans: [false, false, true] },
+    { feature: "Priority Support", plans: [false, true, true] },
+    { feature: "Voice Memo", plans: [false, true, true] },
+    { feature: "Dropbox Integration", plans: [false, true, true] },
     { feature: "Notepad", plans: [false, false, true] },
-    { feature: "Dropbox Integration", plans: [false, false, true] },
     { feature: "Customizable Solutions", plans: [false, false, true] },
   ];
 
