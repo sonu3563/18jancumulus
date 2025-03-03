@@ -749,6 +749,7 @@ const showAlert = (variant, title, message) => {
     // console.log("notify", notify);
     // console.log("message", message);
     if (!selectedEmails || !token) {
+      showAlert("warning", "Please Select Email ", "No designees selected");
       // console.error("Missing required fields: to_email_id or token.");
       return;
     }
@@ -772,11 +773,13 @@ const showAlert = (variant, title, message) => {
           },
         }
       );
-      showAlert({ variant: "success", title: "File Shared", message: " Voice memo has been shared successfully!" });
+
+      showAlert("success", "Success ", "Voice memo has been shared successfully!");
       // Handle the response, if needed
       // console.log("File shared successfully:", response.data);
     } catch (error) {
-      showAlert({ variant: "error", title: "Sharing Failed", message: "Error sharing file:", error });
+  
+      showAlert("error", "Sharing Failed ", "An error occurred while sharing the voice. Please try again.");
       // console.error("Error sharing file:", error);
     } finally {
       hideLoading();
