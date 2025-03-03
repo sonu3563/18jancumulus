@@ -1675,7 +1675,9 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery, }) => {
   const shareFile = async (fileId) => {
 
     if (!selectedEmails.length) {
-      showAlert({ variant: "warning", title: "Please Select Email", message: "No designees selected" });
+      // showAlert({ variant: "warning", title: "Please Select Email", message: "No designees selected" });
+      showAlert("warning", "Please Select Email ", "No designees selected");
+      
       // console.error("No designees selected.");
       return;
     }
@@ -1715,14 +1717,16 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery, }) => {
           },
         }
       );
-      showAlert({ variant: "success", title: "File Shared", message: "The file has been shared successfully!" });
+      // showAlert({ variant: "success", title: "File Shared", message: "The file has been shared successfully!" });
+      showAlert("success", "Success ", "The file has been shared successfully.");
       // Handle the response, if needed
       // console.log("File shared successfully:", response.data);
       // const [shareFolderModal, setShareFolderModal] = useState(false);
       setShareFolderModal(false);
       fetchFiles();
     } catch (error) {
-      showAlert({ variant: "error", title: "Sharing Failed", message: "An error occurred while sharing the file. Please try again." });
+      // showAlert({ variant: "error", title: "Sharing Failed", message: "An error occurred while sharing the file. Please try again." });
+      showAlert("error", "Sharing Failed ", "An error occurred while sharing the file. Please try again.");
 
       // console.error("Error sharing file:", error);
     }
