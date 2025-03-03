@@ -8,14 +8,17 @@ const Alert = ({ variant, title, message, showLink = false, linkHref = "#", link
     success: {
       container: "border-green-500 bg-green-50 text-green-800",
       icon: "text-green-500",
+      symbol: "✅",
     },
     error: {
       container: "border-red-500 bg-red-50 text-red-800",
       icon: "text-red-500",
+      symbol: "❌",
     },
     warning: {
       container: "border-yellow-500 bg-yellow-50 text-yellow-800",
       icon: "text-yellow-500",
+      symbol: "⚠️",
     },
   };
 
@@ -28,7 +31,7 @@ const Alert = ({ variant, title, message, showLink = false, linkHref = "#", link
       className={`fixed bottom-4 right-4 w-80 p-4 rounded-lg shadow-lg border-l-4 z-50 ${variantClasses[variant]?.container}`}
     >
       <div className="flex items-start">
-        <span className={`mr-3 text-xl ${variantClasses[variant]?.icon}`}>⚠️</span>
+        <span className={`mr-3 text-xl ${variantClasses[variant]?.icon}`}>{variantClasses[variant]?.symbol}</span>
         <div>
           <h4 className="font-semibold">{title}</h4>
           <p className="text-sm">{message}</p>
