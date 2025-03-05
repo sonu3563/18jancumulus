@@ -365,7 +365,7 @@ showAlert("error", "Failed", data.message || "Failed to update access");
           </div>
           <div className="mt-2 bg-white rounded hidden md:flex  max-h-[80vh]  pb-[100px] overflow-y-scroll">
             <table className="min-w-full table-auto">
-              <thead className="sticky top-0 z-50">
+              <thead className="sticky top-0 z-20">
                 <tr className="bg-gray-100 text-left text-[0.8rem] border-black">
                   <th className="p-2 md:p-4 font-medium text-[#667085] text-sm w-[30%]">
                     File Name
