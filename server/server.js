@@ -23,12 +23,14 @@ const historyRoutes = require('./routes/historyRoutes');
 const securitypassRoutes = require('./routes/securitypassRoutes');
 const app = express();
 const PORT = 3000;
-app.use('/api/stripe', express.raw({ type: 'application/json' }));
+
+app.use('/api/payment', express.raw({ type: 'application/json' }));
+
 app.use(express.json());
 
 app.use(cookieParser());
 app.use(cors({
-  origin: 'https://www.cumulus.rip',
+  origin: 'http://localhost:3001',
   credentials: true,
 }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -45,12 +47,14 @@ app.use(session({
   },
 }));
 
+app.use('/api/payment', stripeWebhook);
+app.use('/api/stripe', stripeRoutes); 
 app.use("/api/auth", userRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);
 app.use("/api", fileuploadRoutes);
 app.use("/api/voice-memo", voiceuploadRoutes);
 app.use("/api/default", defaultfileRoutes);
-app.use('/api/stripe', stripeRoutes);
+
 app.use('/api', membershipRoutes);
 app.use("/api/help-support", helpandsupport);
 app.use("/api/designee", designeeRoutes);
@@ -61,7 +65,7 @@ app.use("/api", faqRoutes);
 app.use("/api", emailRoutes);
 app.use("/api/history", historyRoutes);
 app.use("/api/gain-access", securitypassRoutes);
-app.use('/api/stripe', stripeWebhook);
+
 
 
 const DB_URI = process.env.DB_URI;
