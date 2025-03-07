@@ -20,29 +20,44 @@ function SubscriptionCard({ data }) {
   
     const stripe = await loadStripe('pk_live_51QygE8J7Fy59EZyjsleXQrZGvGmFDKY8lv7p5uIV0Onrc11eQLMzj1Rwi8YewBVrdRFiMv7W3PSMNwZrIHXLY3zN00xFl5VsPo');
   
+    if (!planName || !billingCycle) {
+      console.error("❌ Missing required parameters: planType or duration");
+      return;
+    }
+  
     const body = {
       planType: planName, // Pass name instead of ID
       duration: billingCycle, // Send 'monthly' or 'yearly'
     };
   
     try {
+      console.log("📤 Body being sent to API:", body);
       const response = await fetch(`${API_URL}/api/stripe/create-checkout-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
   
-      const session = await response.json();
+      if (response.ok) {
+        const session = await response.json();
+        console.log("🎉 Session created:", session);
   
-      if (session.id) {
-        await stripe.redirectToCheckout({ sessionId: session.id });
+        if (session.id) {
+          await stripe.redirectToCheckout({ sessionId: session.id });
+        } else {
+          console.error("❌ Stripe session creation failed:", session.error || "Unknown error");
+        }
       } else {
-        console.error("❌ Stripe session creation failed:", session.error);
+        console.error("❌ Failed to create checkout session. Status:", response.status);
+        const error = await response.json();
+        console.error("❌ Error details:", error);
       }
     } catch (error) {
       console.error("❌ Error during checkout session creation", error);
     }
   };
+  
+  
   
   
 
@@ -171,7 +186,7 @@ function Subscription() {
     {
       cost: {
         monthly: "4.99",
-        yearly: "49",
+        yearly: "35.93",
         custom_pricing: false,
       },
       features: {
@@ -192,7 +207,7 @@ function Subscription() {
     {
       cost: {
         monthly: "9.99",
-        yearly: "99",
+        yearly: "71.93",
         custom_pricing: false,
       },
       features: {
