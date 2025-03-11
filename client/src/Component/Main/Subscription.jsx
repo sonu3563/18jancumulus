@@ -17,7 +17,7 @@ function SubscriptionCard({ data }) {
 
   const handleUpgradePlan = async (planName, billingCycle) => {
     console.log("📤 Sending request with:", { planType: planName, duration: billingCycle });
-  
+   const userId = localStorage.getItem("userId");
   //  const stripe = await loadStripe('pk_live_51QygE8J7Fy59EZyjsleXQrZGvGmFDKY8lv7p5uIV0Onrc11eQLMzj1Rwi8YewBVrdRFiMv7W3PSMNwZrIHXLY3zN00xFl5VsPo');
    const stripe = await loadStripe('pk_test_51QygE8J7Fy59EZyjD32cUYRILHglbcefxO4E2wpYTtV9N5RkkTVw1S2SpTSci5DOdFtzq0TIKQ4J8MCli2qZQqyA00WchFE1Ml');
     if (!planName || !billingCycle) {
@@ -28,6 +28,7 @@ function SubscriptionCard({ data }) {
     const body = {
       planType: planName, // Pass name instead of ID
       duration: billingCycle, // Send 'monthly' or 'yearly'
+      user_id: userId,
     };
   
     try {
