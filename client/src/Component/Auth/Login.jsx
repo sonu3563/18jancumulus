@@ -250,7 +250,7 @@ const Login = ({ name = "Daniel" }) => {
             localStorage.setItem("token", data.accessToken);
             localStorage.setItem("user", data.user.username);
             localStorage.setItem("email", data.user.email);
-    
+           localStorage.setItem("userId", data.user.user_id);
             if (!data.user.questions) { 
                 setDialogOpen2(true);
             } else if (!data.user.phoneNumber || data.user.phoneNumber.trim() === "") {

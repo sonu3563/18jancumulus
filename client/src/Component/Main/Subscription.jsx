@@ -15,9 +15,9 @@ function SubscriptionCard({ data }) {
   const [billingCycle, setBillingCycle] = useState("monthly");
   const [planid, setPlanid] = useState(null);
 
-  const handleUpgradePlan = async (planName, billingCycle) => {
-    console.log("📤 Sending request with:", { planType: planName, duration: billingCycle });
-  
+  const handleUpgradePlan = async (planName, billingCycle,subscriptionId) => {
+    console.log("📤 Sending request with:", { planType: planName, duration: billingCycle, subscriptionId });
+   const userId = localStorage.getItem("userId");
   //  const stripe = await loadStripe('pk_live_51QygE8J7Fy59EZyjsleXQrZGvGmFDKY8lv7p5uIV0Onrc11eQLMzj1Rwi8YewBVrdRFiMv7W3PSMNwZrIHXLY3zN00xFl5VsPo');
    const stripe = await loadStripe('pk_test_51QygE8J7Fy59EZyjD32cUYRILHglbcefxO4E2wpYTtV9N5RkkTVw1S2SpTSci5DOdFtzq0TIKQ4J8MCli2qZQqyA00WchFE1Ml');
     if (!planName || !billingCycle) {
@@ -28,6 +28,8 @@ function SubscriptionCard({ data }) {
     const body = {
       planType: planName, // Pass name instead of ID
       duration: billingCycle, // Send 'monthly' or 'yearly'
+      user_id: userId,
+      subscription_id: subscriptionId || "",
     };
   
     try {
@@ -66,6 +68,7 @@ function SubscriptionCard({ data }) {
 
     if (clickedId.includes("foundation") || clickedId.includes("legacy")) {
       setSelectedPlan(data);
+      console.log("Selected Plan:", data);
       setShowPopup(true);
     } else if (clickedId.includes("heritage")) {
       navigate("/", { state: { scrollTo: "assistance" } });
@@ -75,6 +78,13 @@ function SubscriptionCard({ data }) {
 
   
   const handleConfirmSubscription = () => {
+    if (!selectedPlan) {
+      console.error("❌ No selected plan found!");
+      return;
+    }
+    
+    console.log("✅ Selected Plan:", selectedPlan); // Debugging log
+  
     let planName = null;
   
     if (selectedPlan.subscription_name.includes("Legacy")) {
@@ -83,20 +93,22 @@ function SubscriptionCard({ data }) {
       planName = "foundationStandard";
     }
   
-    if (planName) {
-      handleUpgradePlan(planName, billingCycle);  // Call function directly with correct parameters
+    if (planName && selectedPlan._id) {
+      console.log("📤 Sending subscription ID:", selectedPlan._id); // Debugging log
+      handleUpgradePlan(planName, billingCycle, selectedPlan._id);
     } else {
-      console.error("Price ID not found for the selected plan.");
+      console.error("❌ Missing price ID or subscription ID!");
     }
   
     setShowPopup(false);
   };
   
   
+  
   // Use useEffect to ensure handleUpgradePlan is called after state updates
   useEffect(() => {
     if (planid && selectedPlan) {
-      handleUpgradePlan(planid, selectedPlan.subscription_name);
+      handleUpgradePlan(planid, selectedPlan.subscription_name ,selectedPlan._id);
     }
   }, [planid]); // Runs whenever planid changes
   
@@ -250,6 +262,7 @@ function Subscription() {
 
   useEffect(() => {
     const formattedPlans = response.map((plan) => ({
+      _id: plan._id,  // ✅ Add this line
       subscription_name: plan.subscription_name,
       price: plan.cost.monthly || "Custom Pricing",
       period: plan.cost.monthly ? "/month" : null,
@@ -267,6 +280,7 @@ function Subscription() {
     }));
     setPlans(formattedPlans);
   }, []);
+  
 
   const togglePlan = () => {
     setIsYearly((prev) => {
