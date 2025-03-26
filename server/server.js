@@ -27,7 +27,7 @@ const app = express();
 const PORT = 3000;
 
 // app.use('/api/payment', express.raw({ type: 'application/json' }));
-
+app.use('/api/payment', stripeWebhook);
 app.use(express.json());
 
 app.use(cookieParser());
@@ -49,7 +49,7 @@ app.use(session({
   },
 }));
 
-app.use('/api/payment', stripeWebhook);
+// app.use('/api/payment', stripeWebhook);
 app.use('/api/stripe', stripeRoutes); 
 app.use("/api/auth", userRoutes);
 app.use("/api/subscriptions", subscriptionRoutes);

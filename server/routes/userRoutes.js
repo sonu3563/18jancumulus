@@ -314,6 +314,26 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
+
+    if (!password) {
+      let user = await Admin.findOne({ email }) || await Userlogin.findOne({ email }).populate("roles.role_id");
+      if (!user) {
+          return res.status(400).json({ message: "User not found" });
+      }
+      return res.status(200).json({
+          message: "User found",
+          user: {
+              user_id: user._id,
+              username: user.username,
+              email: user.email,
+              roles: user.roles ? user.roles.map((role) => ({
+                  role_id: role.role_id?._id || "admin",
+                  roleName: role.role_id?.roleName || "Admin",
+              })) : [{ role_id: "admin", roleName: "Admin" }],
+              phoneNumber: user.phoneNumber,
+          }
+      });
+  }
       // Check in Admin collection first
       let user = await Admin.findOne({ email });
       let role = "admin";
@@ -325,7 +345,7 @@ router.post("/login", async (req, res) => {
       if (!user) {
           return res.status(400).json({ message: "User not found" });
       }
-      const isPasswordValid = await bcrypt.compare(password, user.password);
+      const isPasswordValid = await bcrypt.compare(password || "", user.password);
       if (!isPasswordValid) {
           return res.status(400).json({ message: "Invalid password" });
       }

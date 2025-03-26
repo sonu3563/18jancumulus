@@ -18,7 +18,7 @@ function CompareTable({ onClose }) {
     };
   }, []);
   const tableData = [
-    { feature: "Storage", plans: ["20 GB", "50 GB", "Custom Storage"] },
+    { feature: "Storage", plans: ["10 GB", "20 GB", "Custom Storage"] },
     { feature: "Advanced Encryption", plans: [true, true, true] },
     { feature: "Basic Document Sharing", plans: [true, true, true] },
     { feature: "Basic Inheritance", plans: [true, true, true] },
@@ -268,7 +268,7 @@ function Subscription() {
         custom_pricing: false
       },
       features: {
-        storage: "20 GB",
+        storage: "10 GB",
         encryption: "Advanced Encryption",
         document_sharing: "Standard",
         inheritance_features: "Basic Inheritance",
@@ -289,7 +289,7 @@ function Subscription() {
         custom_pricing: false
       },
       features: {
-        storage: "50 GB",
+        storage: "20 GB",
         encryption: "Enhanced Encryption",
         document_sharing: "Advanced Sharing Controls",
         inheritance_features: "Advanced Nominee Assignment",

@@ -109,7 +109,8 @@ function SubscriptionCard({ data }) {
 
    const userId = localStorage.getItem("userId");
   //  const stripe = await loadStripe('pk_live_51QygE8J7Fy59EZyjsleXQrZGvGmFDKY8lv7p5uIV0Onrc11eQLMzj1Rwi8YewBVrdRFiMv7W3PSMNwZrIHXLY3zN00xFl5VsPo');
-   const stripe = await loadStripe('pk_test_51QygE8J7Fy59EZyjD32cUYRILHglbcefxO4E2wpYTtV9N5RkkTVw1S2SpTSci5DOdFtzq0TIKQ4J8MCli2qZQqyA00WchFE1Ml');
+const stripe = await loadStripe('pk_live_51R46tUJtGMRxDbeFDRN2sRTMOZ9inmw7Nc6SlUaBHPaSdHn94Fo7bXGAHJqWGJAmsk9fU0hVe6fspjBMjazfWxf400VKYCo0fV'); 
+//  const stripe = await loadStripe('pk_test_51QygE8J7Fy59EZyjD32cUYRILHglbcefxO4E2wpYTtV9N5RkkTVw1S2SpTSci5DOdFtzq0TIKQ4J8MCli2qZQqyA00WchFE1Ml');
     if (!planName || !billingCycle) {
       // console.error("❌ Missing required parameters: planType or duration");
       return;
@@ -386,7 +387,7 @@ useEffect(() => {
         custom_pricing: false,
       },
       features: {
-        storage: "20 GB",
+        storage: "10 GB",
         encryption: "Advanced Encryption",
         document_sharing: "Standard",
         inheritance_features: "Basic Inheritance",
@@ -407,7 +408,7 @@ useEffect(() => {
         custom_pricing: false,
       },
       features: {
-        storage: "50 GB",
+        storage: "20 GB",
         encryption: "Enhanced Encryption",
         document_sharing: "Advanced Sharing Controls",
         inheritance_features: "Advanced Nominee Assignment",
@@ -535,7 +536,7 @@ useEffect(() => {
   
 
   const tableData = [
-    { feature: "Storage", plans: ["20 GB", "50 GB", "Custom Storage"] },
+    { feature: "Storage", plans: ["10 GB", "20 GB", "Custom Storage"] },
     { feature: "Advanced Encryption", plans: [true, true, true] },
     { feature: "Basic Document Sharing", plans: [true, true, true] },
     { feature: "Basic Inheritance", plans: [true, true, true] },

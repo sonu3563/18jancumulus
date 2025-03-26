@@ -1,12 +1,21 @@
 require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 const { frontend_URL, backend_URL } = require('../config/apiConfig');
-const prices = {
+{/*const prices = {
   legacyPremiumAnnual: 'price_1R1LqpJ7Fy59EZyjdOgMSCD0',   // Replace with actual price ID from Stripe
   foundationStandardAnnual: 'price_1R1LpnJ7Fy59EZyjrhTX9Dcs', // Replace with actual price ID from Stripe
   legacyPremiumMonthly: 'price_1R1Lq3J7Fy59EZyjgvpROjGN',    // Replace with actual price ID from Stripe
   foundationStandardMonthly: 'price_1R1LnnJ7Fy59EZyjUppahszo', // Replace with actual price ID from Stripe
 };
+*/}
+
+const prices = {
+  legacyPremiumAnnual: 'price_1R6XZGJtGMRxDbeFdDzkHs7O',   // Replace with actual price ID from Stripe
+  foundationStandardAnnual: 'price_1R6XaRJtGMRxDbeFpCrblzQ2', // Replace with actual price ID from Stripe
+  legacyPremiumMonthly: 'price_1R6XZtJtGMRxDbeFxGVY8oRA',    // Replace with actual price ID from Stripe
+  foundationStandardMonthly: 'price_1R6Xb6JtGMRxDbeF3nfhKmPC', // Replace with actual price ID from Stripe
+};
+
 
 exports.createCheckoutSession = async (sessionData) => {
   try {
