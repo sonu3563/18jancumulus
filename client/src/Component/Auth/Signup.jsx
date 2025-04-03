@@ -1118,7 +1118,7 @@ hideLoading();
         onChange={(e) => setIsotpsendbox(e.target.checked)}
       />
                             <label htmlFor="acceptTerms" className="text-sm text-gray-600">
-I consent to receiving messages from Cumulus Inc.
+I consent to receiving security text messages from Cumulus Inc.
                             </label>
                         </div>
 
