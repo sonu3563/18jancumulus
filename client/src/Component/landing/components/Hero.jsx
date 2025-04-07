@@ -44,6 +44,11 @@ function Hero() {
   const location = useLocation();
   // const navigate = useNavigate();
 
+  const zoomVariants = {
+    initial: { scale: 1 },
+    hover: { scale: 0.9 },
+  };
+
   useEffect(() => {
     if (location.state && location.state.scrollTo) {
       setTimeout(() => {
@@ -77,7 +82,7 @@ function Hero() {
           </div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex md:space-x-3 lg:space-x-8">
+          <div className="hidden md:flex md:space-x-3 lg:space-x-8 items-center">
             <ScrollLink
               to="features"
               smooth={true}
@@ -115,15 +120,22 @@ function Hero() {
               Testimonials
             </ScrollLink>
 
-            <ScrollLink
-              onClick={handleClick}
-              className="cursor-pointer text-lg p-1 px-2 border text-blue-600 bg-white rounded-lg hover:font-semibold"
-              smooth={true}
-              duration={500}
-              offset={-50}
-            >
-              Login
-            </ScrollLink>
+            <motion.div
+  variants={zoomVariants}
+  initial="initial"
+  whileHover="hover"
+  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+>
+  <ScrollLink
+    onClick={handleClick}
+    className="cursor-pointer text-lg p-1 px-2 border text-blue-600 bg-white rounded-lg"
+    smooth={true}
+    duration={500}
+    offset={-50}
+  >
+    Login
+  </ScrollLink>
+</motion.div>
           </div>
 
           {/* Mobile Menu Button */}
@@ -198,7 +210,7 @@ function Hero() {
                   duration={500}
                   offset={-50}
                 >
-                  Get Started
+                 Login
                 </ScrollLink>
               </div>
             </motion.div>

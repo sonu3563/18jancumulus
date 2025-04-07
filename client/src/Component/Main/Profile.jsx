@@ -39,6 +39,7 @@ const Profile = () => {
   const [folderSize, setFolderSize] = useState(null);
   const [deletebutton1, setDeletebutton1] = useState(null);
   const [error, setError] = useState(null);
+  const [email, setEmail] = useState("");
   const [needshow, setNeedshow] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [memb, setMemb] = useState(false);
@@ -59,13 +60,16 @@ const [storageData, setStorageData] = useState(null);
 const [storageData1, setStorageData1] = useState(null);
 const [voiceMemoData, setVoiceMemoData] = useState(null);
 const [planPrice, setPlanPrice] = useState("");
-  const [UpdatePassword, setUpdatePassword] = useState(false)
+  const [UpdatePassword, setUpdatePassword] = useState(false);
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
+       const [countryCode, setCountryCode] = useState('+1'); 
   const [userDetails, setUserDetails] = useState({
     name: "",
     email: "",
     phone: "",
   });
+  const [phoneverifybox, setPhoneverifybox] = useState(false);
+  const [otpverifybox, setOtpverifybox] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const { profilePicture, setProfilePicture } = useContext(ProfileContext);
   const navigate = useNavigate();
@@ -74,10 +78,121 @@ const [planPrice, setPlanPrice] = useState("");
   const [showPopup, setShowPopup] = useState(false);
   const [socialSecurityNumber, setSocialSecurityNumber] = useState("");
   const [homeAddress, setHomeAddress] = useState("");
+ const [phoneNumber, setPhoneNumber] = useState(''); // Phone number input
+    const [isotpsendbox, setIsotpsendbox] = useState(false);
+    const [otp, setOtp] = useState(Array(6).fill(""));
+
+    const verifyOTP = async () => { 
+      console.log("otp", otp);
+      console.log("phone", `${countryCode}${phoneNumber}`);
+
+      if (!otp || !phoneNumber) {
+        console.error("Missing OTP or Phone Number");
+        // alert("OTP and phone number are required!");
+        return;
+      }
+     
+    try {
+      const requestBody = {
+        phoneNumber: `${countryCode}${phoneNumber}`, 
+        otp: otp.toString().trim()
+    };
+
+    console.log("Request Body:", requestBody);
+  
+      // Making the POST request using axios
+      const response = await axios.post(`${API_URL}/api/otp/verify-otp`, requestBody, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+      });
+      
+      // Directly access the response data
+      const data = response.data;
+      console.log("response",data);
+      if (data.success) {
+      setMessage('Phone number verified successfully!');
+          await updatePhoneNumber();
+   
+        }
+        else{
+          console.error("Error verifying OTP:", data.message);
+          // alert(data.message || "Verification failed. Please try again.");
+          showAlert("error", "Failed", "Otp is invalid or expired");
+
+        }
+      
+      }catch (error) {
+        console.error("Error verifying OTP:", error.response ? error.response.data : error.message);
+        // alert('Error: OTP verification failed.');
+        showAlert("error", "Failed", error.message);
+      }
+    };
+
+
+  const updatePhoneNumber = async () => {
+        const phone = { email, phoneNumber }; // Ensure you're sending email and phoneNumber
+
+        // console.log("Login Payload:", phone);
+
+        try {
+            const response = await fetch(`${API_URL}/api/auth/update-phone`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(phone),
+            });
+
+            // Check if the response is successful
+            if (response.ok) {
+                const data = await response.json();  // Parse the response body as JSON
+                setMessage(data.message || "Phone number updated successfully.");
+          setOtpverifybox(false);
+          fetchUserData();
+          setIsEditMode(false);
+            } else {
+                // If response is not successful, handle the error
+                const errorData = await response.json();  // Parse the error response
+                if (errorData.message === "This phone number is already registered.") {
+                    setMessage("This phone number is already registered with another account.");
+                } else {
+                    setMessage(errorData.message || "Failed to update phone number.");
+                }
+            }
+        } catch (error) {
+            // Handle any network or unexpected errors
+            console.error("Error details:", error);
+            setMessage(error.message || "Failed to update phone number.");
+        }
+    };
+
+
+
+    const otphandle = (e) => {
+      setOtp(e.target.value);
+  };
+
+
+
+ 
+ const handlePhoneNumberChange = (e) => {
+  const value = e.target.value;
+
+  // Allow only numbers and ensure it's exactly 10 digits
+  if (/^\d{0,10}$/.test(value)) {
+      setPhoneNumber(value);
+  }
+};
+
+
   const [formData, setFormData] = useState({
     ssn: "",
     address: "",
   });
+  const handleCountryCodeChange = (event) => {
+    setCountryCode(event.target.value);
+  };
+
+
   const [isEdditing, setIsEdditing] = useState({
     ssn: false,
     address: false,
@@ -97,38 +212,135 @@ const showAlert = (variant, title, message) => {
 };
   const [socialSecurityPass, setSocialSecurityPass] = useState("");
   const [loading, setLoading] = useState(false);
-  const handleSubmit = async () => {
-    setLoading(true);
-    setMessage("");
-    try {
-      const response = await fetch(`${API_URL}/api/gain-access/verify-social-pass`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ socialSecurityPass }),
-      });
-      const data = await response.json();
-      if (response.ok) {
-        // alert("verified");
-        setMessage("Password verified. You can now update details.");
-        setTimeout(() => {
-        }, 1000);
-        setSocialSecurityPass("");
-        setStatus(false);
-        setValidate(false);
-        setInformation(true);
 
-      } else {
-        setMessage(data.message);
-        alert("Please enter valid key")
-      }
-    } catch (error) {
-      setMessage("Error verifying password.");
+  const handleSubmit = async (e) => {
+    setOtp("");
+    e.preventDefault();
+    
+    if (phoneNumber.trim() === '') {
+        setMessage('Please enter a phone number');
+        return;
     }
-    setLoading(false);
-  };
+
+    const isRegistered = await checkPhoneNumber(phoneNumber);
+    if (!isRegistered) {
+        sendOtpWithTwilio(phoneNumber);
+    }
+};
+
+const checkPhoneNumber = async (phoneNumber) => {
+  const data = { phoneNumber };
+
+  // console.log("Checking phone number:", phoneNumber);
+
+  try {
+      const response = await fetch(`${API_URL}/api/auth/check-phone`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+      });
+
+      // Check if the response is successful (status 2xx)
+      if (response.ok) {
+          const contentType = response.headers.get('Content-Type');
+          
+          if (contentType && contentType.includes('application/json')) {
+              const responseData = await response.json();
+              if (responseData.message === "Phone number already registered.") {
+                  setMessage("This phone number is already registered.");
+                  return true; // Phone number exists
+              } else if (responseData.message === "Phone number is available.") {
+                  setMessage("Phone number is available.");
+                  return false; // Phone number is available
+              }
+          } else {
+              setMessage("Received unexpected non-JSON response.");
+          }
+      } else {
+          // Handle error response gracefully
+          const errorData = await response.text(); // Read response as text
+          // console.error("Error response:", errorData);
+          setMessage("Failed to check phone number.");
+      }
+  } catch (error) {
+      // console.error("Error details:", error);
+      setMessage(error.message || "Failed to check phone number.");
+  }
+};
+
+
+const sendOtpWithTwilio = async () => {
+  console.log("Payload:", { phone_number: `${countryCode}${phoneNumber}` });
+
+  if (!phoneNumber || phoneNumber.trim() === '') {
+      alert('Phone number is required.');
+      return;
+  }
+
+  // setLoading(true);
+  try {
+      console.log("Sending OTP...");
+
+      const payload = { phoneNumber: `${countryCode}${phoneNumber}` };
+
+      const response = await axios.post(`${API_URL}/api/otp/send-otp`, payload, {
+          headers: {
+              'Content-Type': 'application/json', // JSON fosrmat mein bhej raha hai
+          },
+      });
+
+      console.log("Response received:", response);
+
+      if (response.data.success) {
+          setMessage('OTP sent successfully!');
+         setPhoneverifybox(false);
+         setOtpverifybox(true);
+      } else {
+          setMessage(`Error: ${response.data.phone_number || 'Unknown error.'}`);
+      }
+  } catch (error) {
+      console.error("Error sending OTP:", error);
+      setMessage('Something went wrong.');
+  } finally {
+      // setLoading(false);
+  }
+};
+
+
+
+
+  // const handleSubmit = async () => {
+  //   setLoading(true);
+  //   setMessage("");
+  //   try {
+  //     const response = await fetch(`${API_URL}/api/gain-access/verify-social-pass`, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //         Authorization: `Bearer ${localStorage.getItem("token")}`,
+  //       },
+  //       body: JSON.stringify({ socialSecurityPass }),
+  //     });
+  //     const data = await response.json();
+  //     if (response.ok) {
+  //       // alert("verified");
+  //       setMessage("Password verified. You can now update details.");
+  //       setTimeout(() => {
+  //       }, 1000);
+  //       setSocialSecurityPass("");
+  //       setStatus(false);
+  //       setValidate(false);
+  //       setInformation(true);
+
+  //     } else {
+  //       setMessage(data.message);
+  //       alert("Please enter valid key")
+  //     }
+  //   } catch (error) {
+  //     setMessage("Error verifying password.");
+  //   }
+  //   setLoading(false);
+  // };
   const handleGainAccess = async () => {
     setMessage("");
     try {
@@ -226,6 +438,9 @@ const showAlert = (variant, title, message) => {
             console.error("Invalid user data structure");
             return;
         }
+        console.log("helooo",data);
+        console.log(data.user.email);
+        setEmail(data.user.email);
 
         // ✅ Log membership details
         // console.log("User memberships:", data.memberships);
@@ -917,15 +1132,26 @@ const handleChangePassword = async () => {
                     onClick={toggleEditMode}
                   ></i> */}
                   </div>
-                  <img src={profileicon} className={`${cut ? 'hidden' : 'inline'} h-[37px] mt-1`} alt="" onClick={toggleEditMode} />
-                  {
-                    cut &&
-                    <p onClick={() => {
-                      setIsEditMode(false);
-                      setCut(false);
-                    }}>
-                      <X className="mt-3 text-gray-500" /></p>
-                  }
+              {!isEditMode ? (
+  <img
+    src={profileicon}
+    className={` h-[37px] mt-1`}
+    alt=""
+    onClick={toggleEditMode}
+  />
+) : (
+  cut && (
+    <p
+      onClick={() => {
+        setIsEditMode(false);
+        setCut(false);
+      }}
+    >
+      <X className="mt-3 text-gray-500" />
+    </p>
+  )
+)}
+
                 </div>
                 <div className="px-6 py-3 border-b-2 border-[#ececec]">
                   <p className="text-gray-500">Name</p>
@@ -956,36 +1182,56 @@ const handleChangePassword = async () => {
                   )}
                 </div>
                 <div className="mb-4 px-6 py-3">
-                  <p className="text-gray-500">Phone number</p>
-                  {!isEditMode ? (
-                    <p>{userDetails.phone}</p>
-                  ) : (
-                    <input
-                      id="phone"
-                      className="border border-gray-300 rounded-lg p-2 w-full"
-                      type="text"
-                      value={userDetails.phone}
-                      onChange={handleInputChange}
-                    />
-                  )}
-                </div>
-                <div className="mb-4 px-6 pb-3 flex gap-x-2 justify-end">
-                  {isEditMode && (
-                    <>
-                      <button
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-                        onClick={updatePassword}
-                      >
-                        Update Password
-                      </button>
-                      <button
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg"
-                        onClick={saveChanges}>
-                        Save
-                      </button>
-                    </>
-                  )}
-                </div>
+  <p className="text-gray-500">Phone number</p>
+
+  {userDetails.phone ? (
+    <p className="text-black">{userDetails.phone}</p>
+  ) : (
+    isEditMode && (
+      <p className="text-red-500">
+        You haven’t verified your number. Update phone number to verify.
+      </p>
+    )
+  )}
+
+
+</div>
+
+
+<div className="flex flex-wrap justify-evenly px-6 pb-4 gap-2">
+  {isEditMode && (
+    <>
+      <button
+        onClick={updatePassword}
+        className="bg-blue-600 text-white text-sm px-4 py-1.5 rounded-md hover:bg-blue-700 transition"
+      >
+        Change Password
+      </button>
+
+      <button
+        type="submit"
+        onClick={() => setPhoneverifybox(true)}
+        className="bg-blue-600 text-white text-sm px-4 py-1.5 rounded-md hover:bg-blue-700 transition"
+      >
+        Update Phone Number
+      </button>
+
+
+      <button
+        onClick={saveChanges}
+        className="bg-blue-600 text-white text-sm px-4 py-1.5 rounded-md hover:bg-blue-700 transition"
+      >
+        Save Changes
+      </button>
+
+    
+    </>
+  )}
+</div>
+
+
+
+
               </div>
               {
                 UpdatePassword && (
@@ -1468,6 +1714,157 @@ const handleChangePassword = async () => {
             </div>
           </div>
         )}
+{phoneverifybox && (
+  <div className="fixed inset-0 bg-gray-800 bg-opacity-50 z-50 flex items-center justify-center">
+    <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
+      
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-black">Phone Verification</h2>
+        <button
+          className="text-gray-600 hover:text-black"
+          onClick={() => {
+            setPhoneverifybox(false);
+            hideLoading();
+            setMessage("");
+          }}
+        >
+          <X className="h-6 w-6" />
+        </button>
+      </div>
+
+      <hr className="mb-4" />
+
+      {/* Stepper */}
+
+
+      {/* Phone Input */}
+      <div className="flex items-center gap-2 p-3 bg-gray-100 rounded-lg shadow-sm">
+        <select
+          className="border text-black border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          value={countryCode}
+          onChange={handleCountryCodeChange}
+        >
+          <option value="+1">+1 (US)</option>
+          <option value="+91">+91 (IND)</option>
+          <option value="+81">+81 (JPN)</option>
+        </select>
+        <input
+          type="text"
+          id="phoneNumber"
+          value={phoneNumber}
+          onChange={handlePhoneNumberChange}
+          className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none text-black"
+          placeholder="Enter phone number"
+        />
+      </div>
+
+      {/* Checkbox */}
+      <div className="flex items-center space-x-2 mt-3">
+        <input
+          type="checkbox"
+          id="acceptTerms"
+          className="h-4 w-4 border-gray-300 rounded"
+          checked={isotpsendbox}
+          onChange={(e) => setIsotpsendbox(e.target.checked)}
+        />
+        <label htmlFor="acceptTerms" className="text-sm text-gray-600">
+          Click here if you’d like to add phone number verification
+        </label>
+      </div>
+
+      {/* Message */}
+      {message && (
+        <div className="mt-4 p-2 border rounded-md text-center bg-gray-100 text-gray-800 text-sm">
+          {message}
+        </div>
+      )}
+
+      {/* Buttons */}
+      <button
+        onClick={handleSubmit}
+        disabled={phoneNumber.length < 10 || !isotpsendbox}
+        className={`w-full mt-4 py-2 rounded-md transition ${
+          phoneNumber.length < 10 || !isotpsendbox
+            ? 'bg-white text-blue-500 border border-blue-500 cursor-not-allowed'
+            : 'bg-blue-500 text-white hover:bg-blue-600'
+        }`}
+      >
+        Next
+      </button>
+
+    </div>
+  </div>
+)}
+
+
+{otpverifybox && (
+  <div className="fixed inset-0 bg-gray-800 bg-opacity-50 z-50 flex items-center justify-center">
+    <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
+
+      {/* Header */}
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold text-black">Phone Verification</h2>
+        <button
+          className="text-gray-600 hover:text-black"
+          onClick={() => {
+            setOtpverifybox(false);
+            hideLoading();
+            setMessage("");
+          }}
+        >
+          <X className="h-6 w-6" />
+        </button>
+      </div>
+
+      <hr className="mb-4" />
+
+      {/* Stepper */}
+      <div className="flex items-center  mb-4">
+        <div className="text-black flex items-center">
+       
+        <span className="text-sm md:text-base">Please enter the OTP sent to {countryCode}{phoneNumber}</span>
+        </div>
+      </div>
+
+      {/* OTP Input */}
+      <div className="mb-4">
+        {/* <label htmlFor="otp" className="block text-sm font-medium text-gray-700 mb-1">
+          Enter OTP
+        </label> */}
+        <input
+          type="text"
+          id="otp"
+          value={otp}
+          maxLength={6}
+          onChange={otphandle}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+          placeholder="Enter OTP"
+        />
+      </div>
+
+      {/* Submit Button */}
+      <button
+        onClick={verifyOTP}
+        disabled={!otp}
+        className={`w-full py-2 rounded-md transition ${
+          otp
+            ? 'bg-blue-500 text-white hover:bg-blue-600'
+            : 'bg-white text-blue-500 border border-blue-500 cursor-not-allowed'
+        }`}
+      >
+        Submit
+      </button>
+    </div>
+  </div>
+)}
+
+
+
+
+
+
+
 {alert && <Alert {...alert} />}
       </div>
 

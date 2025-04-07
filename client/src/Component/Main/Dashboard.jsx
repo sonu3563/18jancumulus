@@ -2103,6 +2103,7 @@ if (usedStorageInBytes + totalFileSize > totalStorageInBytes) {
               {/* Folder Name */}
               <div className="flex items-center md:gap-x-2 border-b-4 border-blue-500 text-blue-500">
                 <span className=" font-semibold pb-2 mr-2">
+                {/* {folderId == 0 ? 'All Files' : folderId === 1 ? 'Cumulus' : foldername} */}
                 {folderId == 0 ? 'All Files' : folderId === 1 ? 'Cumulus' : foldername}
 
                 </span>
@@ -3167,19 +3168,23 @@ if (usedStorageInBytes + totalFileSize > totalStorageInBytes) {
                             >
                               + Create New Folder
                             </button>
-                            {folders.map((folder) => (
-                              <p
-                                key={folder.id}
-                                className="p-2 text-md text-gray-700 cursor-pointer font-semibold hover:bg-gray-200 rounded-lg transition"
-                                onClick={() => {
-                                  handleFolderSelect(folder.id);
-                                  setFolderLocked(true);
-                                  setCreateFolderPopuup(false);
-                                }}
-                              >
-                                {folder.name}
-                              </p>
-                            ))}
+                            {folders
+  .slice() // create a shallow copy to avoid mutating the original array
+  .sort((a, b) => b.name.localeCompare(a.name)) // sort by name descending
+  .map((folder) => (
+    <p
+      key={folder.id}
+      className="p-2 text-md text-gray-700 cursor-pointer font-semibold hover:bg-gray-200 rounded-lg transition"
+      onClick={() => {
+        handleFolderSelect(folder.id);
+        setFolderLocked(true);
+        setCreateFolderPopuup(false);
+      }}
+    >
+      {folder.name}
+    </p>
+))}
+
                           </div>
                         )}
                       </div>

@@ -113,26 +113,27 @@ function Footer() {
 
           {/* Legal Links */}
           <div className="flex flex-col items-start">
-            <h3 className="text-lg font-medium text-gray-800">Legal</h3>
-            <ul className="mt-4 space-y-2">
-              <li>
-                <button
-                  onClick={() => navigate("/terms")}
-                  className="text-gray-600 cursor-pointer hover:text-blue-500 focus:outline-none"
-                >
-                  Terms & Conditions
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => navigate("/privacy")}
-                  className="text-gray-600 cursor-pointer hover:text-blue-500 focus:outline-none"
-                >
-                  Privacy Policy
-                </button>
-              </li>
-            </ul>
-          </div>
+  <h3 className="text-lg font-medium text-gray-800">Legal</h3>
+  <ul className="mt-4 space-y-2">
+    <li>
+      <a
+        href="/Terms.html"
+        className="text-gray-600 cursor-pointer hover:text-blue-500 focus:outline-none"
+      >
+        Terms & Conditions
+      </a>
+    </li>
+    <li>
+      <a
+        href="/privacy.html"
+        className="text-gray-600 cursor-pointer hover:text-blue-500 focus:outline-none"
+      >
+        Privacy Policy
+      </a>
+    </li>
+  </ul>
+</div>
+
         </div>
       </div>
 
@@ -246,33 +247,7 @@ function Footer() {
 
 
 
-            {/* Checkbox */}
-            {/* <div className="flex items-center space-x-2 mb-4">
-              <input
-                type="checkbox"
-                id="acceptTerms"
-                className="h-4 w-4 border-gray-300 rounded"
-              />
-              <label htmlFor="acceptTerms" className="text-sm text-gray-600">
-                By signing this, you agree to the Privacy Policy and Terms of Service.
-              </label>
-            </div> */}
-
-            {/* Buttons */}
-            {/* <div className="flex justify-end space-x-4">
-              <button
-                className="px-4 py-2 text-sm bg-white border border-blue-500 text-blue-500 rounded-md hover:bg-gray-400"
-                onClick={() => setDialogOpen(false)}
-              >
-                Decline
-              </button>
-              <button
-                className="px-4 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                onClick={() => setDialogOpen(false)}
-              >
-                I Agree
-              </button>
-            </div> */}
+            
           </div>
         </div>
       )}
@@ -395,37 +370,6 @@ function Footer() {
               <li className='mb-4 px-2 py-2'>In the event of a data breach, we will promptly notify affected users and the relevant regulatory authorities, as required by applicable data protection laws. We will take all necessary measures to mitigate the impact of such a breach and prevent future occurrences.</li>
             </pre>
 
-
-
-
-
-            {/* Checkbox */}
-            {/* <div className="flex items-center space-x-2 mb-4">
-              <input
-                type="checkbox"
-                id="acceptTerms"
-                className="h-4 w-4 border-gray-300 rounded"
-              />
-              <label htmlFor="acceptTerms" className="text-sm text-gray-600">
-                By signing this, you agree to the Privacy Policy and Terms of Service.
-              </label>
-            </div> */}
-
-            {/* Buttons */}
-            {/* <div className="flex justify-end space-x-4">
-              <button
-                className="px-4 py-2 text-sm bg-white border border-blue-500 text-blue-500 rounded-md hover:bg-gray-400"
-                onClick={() => setDialogOpen(false)}
-              >
-                Decline
-              </button>
-              <button
-                className="px-4 py-2 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                onClick={() => setDialogOpen(false)}
-              >
-                I Agree
-              </button>
-            </div> */}
           </div>
         </div>
       )}
