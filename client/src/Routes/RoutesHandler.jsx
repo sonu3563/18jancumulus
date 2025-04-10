@@ -7,8 +7,8 @@ import Enterdashboard from '../Component/Auth/Enterdashboard';
 import Thankyou from '../Component/Auth/Thankyou';
 import Subscription from '../Component/Main/Subscription';
 import Hero from '../Component/landing/components/Hero';
-import { Terms } from '../Component/landing/Privacy/Terms';
-import { Privacy } from '../Component/landing/Privacy/Privacy';
+// import { Terms } from '../Component/landing/Privacy/Terms';
+// import { Privacy } from '../Component/landing/Privacy/Privacy';
 import Mainlayout from '../layout/Mainlayout';
 import AdminLayout from '../layout/AdminLayout';
 import NotFound from '../store/NotFound';
@@ -66,8 +66,8 @@ const RoutesHandler = () => {
     <Routes>
       {/* Public Routes */}
       <Route path="/" element={<Hero />} />
-      <Route path="/terms" element={<Terms />} />
-      <Route path="/privacy" element={<Privacy />} />
+{/*       <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} /> */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/updatepassword" element={<Updatepassword />} />
