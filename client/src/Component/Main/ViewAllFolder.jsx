@@ -6,10 +6,10 @@ import { Trash, PencilLine, EllipsisVertical, Check, X, Plus, ListOrdered } from
 import e from 'cors';
 import editicon from "../../assets/editicon.png";
 import Alert from '../utils/Alerts';
-
+import { useFolder } from '../utils/FolderContext';
 function ViewAllFolder({ searchQuery, onFolderSelect }) {
   const [loading, setLoading] = useState(false);
-  const [folders, setFolders] = useState([]);
+  // const [folders, setFolders] = useState([]);  
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [deletebutton, setDeletebutton] = useState(false);
   const [openMenuId, setOpenMenuId] = useState(false);
@@ -30,7 +30,7 @@ function ViewAllFolder({ searchQuery, onFolderSelect }) {
     const [openEdit, setOpenEdit] = useState(null);
   const inputRef = useRef(null);
   const [alert, setAlert] = useState(null);
-
+  const { handleAddFolder ,fetchFolders , folders } = useFolder();
   const showAlert = (variant, title, message) => {
     setAlert({ variant, title, message });
 
@@ -81,36 +81,36 @@ function ViewAllFolder({ searchQuery, onFolderSelect }) {
       return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-  const fetchFolders = async () => {
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("No token found. Please log in again.");
+  // const fetchFolders = async () => {
+  //   setLoading(true);
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     if (!token) throw new Error("No token found. Please log in again.");
 
-      const response = await axios.get(`${API_URL}/api/get-folders`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+  //     const response = await axios.get(`${API_URL}/api/get-folders`, {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     });
 
 
-      const foldersData = response.data.map((folder) => ({
-        id: folder._id,
-        name: folder.folder_name,
-        created: folder.created_at,
-        updated: folder.updated_at,
-        fileCount: folder.file_count || 0,
-      }));
+  //     const foldersData = response.data.map((folder) => ({
+  //       id: folder._id,
+  //       name: folder.folder_name,
+  //       created: folder.created_at,
+  //       updated: folder.updated_at,
+  //       fileCount: folder.file_count || 0,
+  //     }));
 
-      const sortedFoldersData = foldersData.sort((a, b) => new Date(b.created) - new Date(a.created));
-      // console.log("sorted files by created_at:", sortedFoldersData);
+  //     const sortedFoldersData = foldersData.sort((a, b) => new Date(b.created) - new Date(a.created));
+  //     // console.log("sorted files by created_at:", sortedFoldersData);
 
-      setFolders(sortedFoldersData);
-      // console.log("shdfhasgdfhgdfhgsafdashgdfasghdafhgdafdhgadfsaghdsahgfsadasfh", foldersData)
-    } catch (error) {
-      // console.error("Error fetching folders:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     setFolders(sortedFoldersData);
+  //     // console.log("shdfhasgdfhgdfhgsafdashgdfasghdafhgdafdhgadfsaghdsahgfsadasfh", foldersData)
+  //   } catch (error) {
+  //     // console.error("Error fetching folders:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const addFolder = () => {
     setCreateFolder(true);
@@ -195,48 +195,48 @@ function ViewAllFolder({ searchQuery, onFolderSelect }) {
   }
 
 
-  const handleAddFolder = async () => {
-    if (newFolder.trim()) {
-      setLoading(true);
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("No token found. Please log in again.");
-        }
+  // const handleAddFolder = async () => {
+  //   if (newFolder.trim()) {
+  //     setLoading(true);
+  //     try {
+  //       const token = localStorage.getItem("token");
+  //       if (!token) {
+  //         throw new Error("No token found. Please log in again.");
+  //       }
 
-        const response = await axios.post(
-          `${API_URL}/api/create-folder`,
-          { folder_name: newFolder },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+  //       const response = await axios.post(
+  //         `${API_URL}/api/create-folder`,
+  //         { folder_name: newFolder },
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         }
+  //       );
 
-        const newFolderData = response.data.folder;
-        setFolders([
-          ...folders,
-          { id: newFolderData._id, name: newFolderData.folder_name },
-        ]);
-        setNewFolder("");
-        fetchFolders();
-        setCreateFolder(null);
-        showAlert("success", "success", "Folder Created Successfully.");
-      } catch (error) {
-        if (error.response?.status === 400) {
-          showAlert("error", "Failed", error.response?.data?.message || "A folder with the same name already exists.");
-          // alert(error.response?.data?.message || "A folder with the same name already exists.");
-        } else {
-          // setError(error.response?.data?.message || "Error creating folder.");
-          showAlert("error", "Failed", error.response?.data?.message || "Error creating folder.");
-        }
-      } finally {
-        setLoading(false);
+  //       const newFolderData = response.data.folder;
+  //       setFolders([
+  //         ...folders,
+  //         { id: newFolderData._id, name: newFolderData.folder_name },
+  //       ]);
+  //       setNewFolder("");
+  //       fetchFolders();
+  //       setCreateFolder(null);
+  //       showAlert("success", "success", "Folder Created Successfully.");
+  //     } catch (error) {
+  //       if (error.response?.status === 400) {
+  //         showAlert("error", "Failed", error.response?.data?.message || "A folder with the same name already exists.");
+  //         // alert(error.response?.data?.message || "A folder with the same name already exists.");
+  //       } else {
+  //         // setError(error.response?.data?.message || "Error creating folder.");
+  //         showAlert("error", "Failed", error.response?.data?.message || "Error creating folder.");
+  //       }
+  //     } finally {
+  //       setLoading(false);
 
-      }
-    }
-  };
+  //     }
+  //   }
+  // };
 
 
   const handleEditable = (id, name) => {
@@ -360,8 +360,8 @@ function ViewAllFolder({ searchQuery, onFolderSelect }) {
                   />
 
                   <button
-                    onClick={handleAddFolder}
-                    className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition ease-in-out duration-300">
+                  onClick={() => handleAddFolder(setNewFolder, newFolder, showAlert, setCreateFolder)}
+                  className="w-full py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition ease-in-out duration-300">
                     Create Folder
                   </button>
                 </div>

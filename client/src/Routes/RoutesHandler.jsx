@@ -14,6 +14,7 @@ import AdminLayout from '../layout/AdminLayout';
 import NotFound from '../store/NotFound';
 import PublicLayout from '../layout/Publiclayout';
 import AdminRoute from '../layout/AdminRoute';
+// import { TermsPage,PrivacyPage } from '../Component/landing/components/StaticPages';
 // Private Route Wrapper
 const PrivateRoute = ({ element, allowedRoles }) => {
   const role = localStorage.getItem("role");
@@ -73,6 +74,8 @@ const RoutesHandler = () => {
       <Route path="/updatepassword" element={<Updatepassword />} />
       <Route path="/thankyou" element={<Thankyou />} />
       <Route path="/shared*" element={<PublicLayout />} />
+      {/* <Route path="/Terms.html" element={<TermsPage />} />
+      <Route path="/privacy.html" element={<PrivacyPage />} /> */}
 
       {/* User Routes */}
       {/* <Route path="/subscription" element={<Subscription />} /> */}

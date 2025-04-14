@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
+import { useNavigate,Link } from "react-router-dom";
 import { Facebook, Twitter, Instagram, Linkedin, X } from 'lucide-react';
 import logo2 from"../Assets/logo2.png";
-import { Link as ScrollLink } from "react-scroll";
+import { Link as ScrollLink  } from "react-scroll";
 
 function Footer() {
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -115,22 +115,22 @@ function Footer() {
           <div className="flex flex-col items-start">
   <h3 className="text-lg font-medium text-gray-800">Legal</h3>
   <ul className="mt-4 space-y-2">
-    <li>
-      <a
-        href="/Terms.html"
-        className="text-gray-600 cursor-pointer hover:text-blue-500 focus:outline-none"
-      >
-        Terms & Conditions
-      </a>
-    </li>
-    <li>
-      <a
-        href="/privacy.html"
-        className="text-gray-600 cursor-pointer hover:text-blue-500 focus:outline-none"
-      >
-        Privacy Policy
-      </a>
-    </li>
+  <li>
+  <Link
+to="/terms"
+    className="text-gray-600 cursor-pointer hover:text-blue-500 focus:outline-none"
+  >
+    Terms & Conditions
+  </Link>
+</li>
+<li>
+  <Link
+to="/privacy"
+    className="text-gray-600 cursor-pointer hover:text-blue-500 focus:outline-none"
+  >
+    Privacy Policy
+  </Link>
+</li>
   </ul>
 </div>
 

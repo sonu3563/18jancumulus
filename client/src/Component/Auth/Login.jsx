@@ -538,13 +538,25 @@ const Login = ({ name = "Daniel" }) => {
         // handleVerifyOtp();
     };
     const handlePhoneNumberChange = (e) => {
-        const value = e.target.value;
-
-        // Allow only numbers and ensure it's exactly 10 digits
-        if (/^\d{0,10}$/.test(value)) {
-            setPhoneNumber(value);
-        }
+      let input = e.target.value.replace(/\D/g, ''); // Remove all non-digit characters
+    
+      if (input.length > 10) {
+        input = input.slice(0, 10); // Limit to 10 digits
+      }
+    
+      let formatted = input;
+    
+      if (input.length > 6) {
+        formatted = `(${input.slice(0, 3)})-${input.slice(3, 6)}-${input.slice(6)}`;
+      } else if (input.length > 3) {
+        formatted = `(${input.slice(0, 3)})-${input.slice(3)}`;
+      } else if (input.length > 0) {
+        formatted = `(${input}`;
+      }
+    
+      setPhoneNumber(formatted);
     };
+    
 
     const otphandle = (e) => {
         setOtp(e.target.value);
@@ -841,16 +853,16 @@ const Login = ({ name = "Daniel" }) => {
 
     <hr />
 
-    <div className="flex items-center space-x-4 mt-4">
-      <div className="text-black">
+    <div className="flex items-center space-x-4 ">
+      {/* <div className="text-black">
         <span className="p-1 px-2 md:p-1 md:px-2.5 bg-blue-500 rounded-2xl text-sm text-black">1</span>
         <span className="ml-1 md:ml-2 text-xs md:text-lg">Security question</span>
-      </div>
-      <span className="text-black text-xs md:text-lg">&gt;</span>
-      <div className="text-black">
-        <span className="p-1 px-2 md:p-1 md:px-2.5 bg-blue-500 rounded-2xl text-sm text-black">2</span>
-        <span className="ml-1 md:ml-2 text-xs md:text-lg">Phone Verification</span>
-      </div>
+      </div> */}
+      {/* <span className="text-black text-xs md:text-lg">&gt;</span> */}
+      {/* <div className="text-black"> */}
+        {/* <span className="p-1 px-2 md:p-1 md:px-2.5 bg-blue-500 rounded-2xl text-sm text-black">2</span> */}
+        {/* <span className="ml-1 md:ml-2 text-xs md:text-lg">Phone Verification</span>
+      </div> */}
     </div>
 
     <div className="flex items-center gap-2 p-4 bg-gray-100 rounded-lg shadow-md mt-4">
@@ -883,10 +895,11 @@ const Login = ({ name = "Daniel" }) => {
         checked={isotpsendbox}
         onChange={(e) => setIsotpsendbox(e.target.checked)}
       />
-      <label htmlFor="acceptTerms" className="text-sm text-gray-600">
-      Click here if you’d like to add phone number verification
+<label htmlFor="acceptTerms" className="text-[13px] text-gray-600 ">
+  I consent to receive security related text messages from Cumulus Inc
+</label>
 
-      </label>
+
     </div>
 
     {message && (
@@ -933,7 +946,7 @@ const Login = ({ name = "Daniel" }) => {
      
           </div>
           <hr />
-          <p className="text-xs text-gray-600 mb-3">
+          <p className="text-xs text-black-600 mb-3">
             We just sent a unique code to your phone. Please be patient as it may take a few minutes for the code to arrive. When you receive the code, please enter it below.
           </p>
 

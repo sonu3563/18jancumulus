@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import React, { useState,useEffect } from "react";
+import { Routes, Route , useNavigate } from "react-router-dom";
 import Sidebar from "../Component/Main/Sidebar";
 import Dashboard from "../Component/Main/Dashboard";
 import Subscription from "../Component/Main/Subscription";
@@ -18,27 +18,66 @@ import TermCodition from "../Component/Main/TermCodition";
 import ViewAllFolder from "../Component/Main/ViewAllFolder";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import Designee from "../Component/Main/Designee";
-
+import { FolderProvider } from "../Component/utils/FolderContext";
+import { DesigneeProvider } from "../Component/utils/DesigneeContext";
 const MainLayout = () => {
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSessionExpired, setShowSessionExpired] = useState(false);
+  const navigate = useNavigate();
 
   const handleFolderSelect = (folderId) => {
     setSelectedFolder(folderId);
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setShowSessionExpired(true);
+    }
+  }, []);
+
+  const handleLoginRedirect = () => {
+    setShowSessionExpired(false);
+    navigate("/Login");  // or wherever your login route is
+  };
+
 
   const CLIENT_ID = "938429058016-5msrkacu32pvubd02tpoqb6vpk23cap3.apps.googleusercontent.com";
 
   return (
     <GoogleOAuthProvider clientId={CLIENT_ID}>
       <UserProvider>
+      <FolderProvider>
+      <DesigneeProvider>
         <ProfileProvider>
           <Routes>
             {/* Standalone Routes - Without Sidebar */}
             <Route path="/subscription" element={<Subscription />} />
             <Route path="/enterdashboard" element={<Enterdashboard />} />
 
+
+     {/* Session expired popup */}
+     {showSessionExpired && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="bg-white p-6 rounded shadow-lg max-w-sm w-full">
+                    <h2 className="text-lg font-semibold mb-2">Session Expired</h2>
+                    <p className="text-sm text-gray-600 mb-4">Your session has expired. Please log in again.</p>
+                    <div className="flex justify-end">
+                      <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded"
+                        onClick={handleLoginRedirect}
+                      >
+                        Login
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
             {/* Main Layout with Sidebar */}
+
+            {!showSessionExpired && (
             <Route 
               path="/*" 
               element={
@@ -66,9 +105,14 @@ const MainLayout = () => {
                 </div>
               }
             />
+          )}
           </Routes>
+     
         </ProfileProvider>
+        </DesigneeProvider>
+        </FolderProvider>
       </UserProvider>
+      
     </GoogleOAuthProvider>
   );
 };

@@ -1169,6 +1169,7 @@ const showAlert = (variant, title, message) => {
       // console.log("Failed to share items. Please try again.");
     } finally {
       setSelectedDesigneeEmails([]);
+      setIsSubmitted("");
       setAddedFiles([]);
       setAddedVoiceMemos([]);
       hideLoading();

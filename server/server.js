@@ -80,4 +80,24 @@ mongoose
     process.exit(1);
   });
 
+
+  // const buildPath = path.join(__dirname, 'build');
+  // app.use(express.static(buildPath));
+  
+  // // Serve Terms.html and privacy.html directly
+  // app.get('/Terms.html', (req, res) => {
+  //   res.sendFile(path.join(buildPath, 'Terms.html'));
+  // });
+  
+  // app.get('/privacy.html', (req, res) => {
+  //   res.sendFile(path.join(buildPath, 'privacy.html'));
+  // });
+  
+  // // Fallback for React SPA routing
+  // app.get('*', (req, res) => {
+  //   res.sendFile(path.join(buildPath, 'index.html'));
+  // });
+  
+
+
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on https://www.cumulus.rip:${PORT}`));

@@ -1291,7 +1291,7 @@ const SharedFiles = () => {
             <>
               <div className="hidden md:inline">
 
-                <table className="w-full table-auto">
+              <table className="w-full table-auto mt-2">
                   <thead>
                     <tr className="bg-gray-200 py-4">
                       <th className="px-2 py-4 text-slate-500 text-left font-semibold">Shared User</th>

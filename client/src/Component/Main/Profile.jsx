@@ -29,7 +29,8 @@ import { FAPI_URL } from "../utils/Apiconfig";
 import { FaPen } from "react-icons/fa";
 import useLoadingStore from "../../store/UseLoadingStore";
 import DropboxPicker from "../utils/GoogleDropboxPicker";
-import GainAccess from "./gainaccess"
+import GainAccess from "./gainaccess";
+import defaultprofile from '../../assets/defaulttwo.jpeg'
 import { Check, X } from "lucide-react";
 const DROPBOX_APP_KEY = "oy5t6b3unmpbk0b";  // Replace with your actual Dropbox App Key
 const DROPBOX_APP_SECRET = "4jne7a8ly866znt";  // Replace with your actual Dropbox App Secret setGoogleemail  deletebutton1
@@ -174,14 +175,25 @@ const [planPrice, setPlanPrice] = useState("");
 
 
  
- const handlePhoneNumberChange = (e) => {
-  const value = e.target.value;
-
-  // Allow only numbers and ensure it's exactly 10 digits
-  if (/^\d{0,10}$/.test(value)) {
-      setPhoneNumber(value);
-  }
-};
+  const handlePhoneNumberChange = (e) => {
+    let input = e.target.value.replace(/\D/g, ''); // Remove all non-digit characters
+  
+    if (input.length > 10) {
+      input = input.slice(0, 10); // Limit to 10 digits
+    }
+  
+    let formatted = input;
+  
+    if (input.length > 6) {
+      formatted = `(${input.slice(0, 3)})-${input.slice(3, 6)}-${input.slice(6)}`;
+    } else if (input.length > 3) {
+      formatted = `(${input.slice(0, 3)})-${input.slice(3)}`;
+    } else if (input.length > 0) {
+      formatted = `(${input}`;
+    }
+  
+    setPhoneNumber(formatted);
+  };
 
 
   const [formData, setFormData] = useState({
@@ -897,6 +909,7 @@ const handleChangePassword = async () => {
         },
       });
       setProfilePicture(response.data.profilePicture); // Set the profile picture URL in state
+
     } catch (error) {
       // console.error("Error fetching profile picture:", error);
     }
@@ -988,6 +1001,8 @@ const handleChangePassword = async () => {
           showAlert("success", "success", "Profile picture updated successfully.");
           fetchProfilePicture();
         }
+        showAlert("success", "success", "Profile picture updated successfully.");
+
         // setProfilePicture(response.data.profilePicture); // Update the state in Navbar
       } catch (error) {
         showAlert("error", "Failed", "Failed to upload profile picture. Please try again.");
@@ -1073,8 +1088,11 @@ const handleChangePassword = async () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gray-300 flex items-center justify-center text-white">No Image</div> // Fallback if no image
-                  )}
+                    <img
+                    src={defaultprofile}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />                  )}
                 </div>
                 <div
                   className="absolute cursor-pointer inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -1768,9 +1786,9 @@ const handleChangePassword = async () => {
           checked={isotpsendbox}
           onChange={(e) => setIsotpsendbox(e.target.checked)}
         />
-        <label htmlFor="acceptTerms" className="text-sm text-gray-600">
-          Click here if you’d like to add phone number verification
-        </label>
+<label htmlFor="acceptTerms" className="text-[13px] text-gray-600 ">
+  I consent to receive security related text messages from Cumulus Inc
+</label>
       </div>
 
       {/* Message */}

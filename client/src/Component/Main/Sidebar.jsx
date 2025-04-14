@@ -38,16 +38,19 @@ import {
 import fetchUserData from "./fetchUserData";
 import { API_URL } from "../utils/Apiconfig";
 import useLoadingStore from "../../store/UseLoadingStore";
+import { useFolder } from "../utils/FolderContext";
+import { useDesignee } from "../utils/DesigneeContext";
 
 const Sidebar = ({ onFolderSelect }) => {
   const [deletebutton, setDeletebutton] = useState(false);
   const [deletebutton2, setDeletebutton2] = useState(false);
-  const [folders, setFolders] = useState([]);
+  // const [folders, setFolders] = useState([]);
   const [preview, setPreview] = useState(null);
   const [file, setFile] = useState(null);
+  const { fetchdesignes, designes } = useDesignee();
 
   const location = useLocation(); // Access current URL for routing
-  // const [designers, setDesigners] = useState([
+  // const [designees, setdesignees] = useState([
   //     "Hariom Gupta",
   //     "Himanshu",
   //     "Designer 3",
@@ -67,12 +70,12 @@ const Sidebar = ({ onFolderSelect }) => {
   const [message, setMessage] = useState(null); // Added for feedback messages
   const [newDesigner, setNewDesigner] = useState("");
   const [showDesignerInput, setShowDesignerInput] = useState(false);
-  // const [viewAllDesigners, setViewAllDesigners] = useState(false);
+  // const [viewAlldesignees, setViewAlldesignees] = useState(false);
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState(null); // For handling errors
-  const [viewAllDesigners, setViewAllDesigners] = useState(false); // Toggles "View All" and "View Less"
-  // const [designers, setDesigners] = useState(["Designer 1", "Designer 2", "Designer 3", "Designer 4"]);
-  const [designers, setDesigners] = useState([]);
+  const [viewAlldesignees, setViewAlldesignees] = useState(false); // Toggles "View All" and "View Less"
+  // const [designees, setdesignees] = useState(["Designer 1", "Designer 2", "Designer 3", "Designer 4"]);
+  // const [designees, setdesignees] = useState([]);
   const [showDesignerPopup, setShowDesignerPopup] = useState(false); // Toggles the popup visibility
   const [designeeName, setDesigneeName] = useState(""); // Holds the input for designee name
   const [designeePhone, setDesigneePhone] = useState(""); // Holds the input for designee phone number
@@ -92,13 +95,19 @@ const Sidebar = ({ onFolderSelect }) => {
   const [storageData, setStorageData] = useState(null);
   const [voiceMemoData, setVoiceMemoData] = useState(null);
   const [planPrice, setPlanPrice] = useState("");
-
+  const {  fetchFolders , folders ,handleAddFolder} = useFolder();
   const handleClickhelp = () => {
     navigate("/help"); // Replace '/target-route' with your desired route
   };
   const handledesigneedashboard = () => {
     navigate("/designee-dashboard"); // Replace '/target-route' with your desired route
   };
+
+  useEffect(() => {
+    fetchdesignes();
+  }, []);
+
+
 
   const getUserData = async () => {
     try {
@@ -267,39 +276,44 @@ const Sidebar = ({ onFolderSelect }) => {
       // console.error(err);
     }
   };
-  const fetchFolders = async () => {
-    setLoading(true);
-    try {
-      // const token = Cookies.get('token');
-      const token = localStorage.getItem("token");
 
-      if (!token) {
-        throw new Error("No token found. Please log in again.");
-        setDeletebutton1(true);
-      }
 
-      const response = await axios.get(`${API_URL}/api/get-folders`, {
-        headers: {
-          Authorization: `Bearer ${token}`, // Include token in Authorization header
-        },
-      });
+  // const fetchFolders = async () => {
+  //   setLoading(true);
+  //   try {
+  //     // const token = Cookies.get('token');
+  //     const token = localStorage.getItem("token");
 
-      // Extract folder names and _id from the response
-      const foldersData = response.data.map((folder) => ({
-        id: folder._id, // Get _id for folder selection
-        name: folder.folder_name,
-      }));
+  //     if (!token) {
+  //       throw new Error("No token found. Please log in again.");
+  //       setDeletebutton1(true);
+  //     }
 
-      setFolders(foldersData); // Set fetched folders
-    } catch (error) {
-      // setError(error.response?.data?.message || "Error fetching folders.");
-      setDeletebutton1(true);
-      localStorage.removeItem("role");
+  //     const response = await axios.get(`${API_URL}/api/get-folders`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`, // Include token in Authorization header
+  //       },
+  //     });
 
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     // Extract folder names and _id from the response
+  //     const foldersData = response.data.map((folder) => ({
+  //       id: folder._id, // Get _id for folder selection
+  //       name: folder.folder_name,
+  //     }));
+
+  //     setFolders(foldersData); // Set fetched folders
+  //   } catch (error) {
+  //     // setError(error.response?.data?.message || "Error fetching folders.");
+  //     setDeletebutton1(true);
+  //     localStorage.removeItem("role");
+
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
+
   const deleteFile = async (folder) => {
     // const token = Cookies.get('token');
     const token = localStorage.getItem("token");
@@ -382,45 +396,45 @@ const Sidebar = ({ onFolderSelect }) => {
   };
 
   // Add folder
-  const handleAddFolder = async () => {
-    if (newFolder.trim()) {
-      setLoading(true);
-      try {
-        // const token = Cookies.get('token');
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("No token found. Please log in again.");
-        }
+  // const handleAddFolder = async () => {
+  //   if (newFolder.trim()) {
+  //     setLoading(true);
+  //     try {
+  //       // const token = Cookies.get('token');
+  //       const token = localStorage.getItem("token");
+  //       if (!token) {
+  //         throw new Error("No token found. Please log in again.");
+  //       }
 
-        const response = await axios.post(
-          `${API_URL}/api/create-folder`,
-          { folder_name: newFolder },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+  //       const response = await axios.post(
+  //         `${API_URL}/api/create-folder`,
+  //         { folder_name: newFolder },
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${token}`,
+  //           },
+  //         }
+  //       );
 
-        const newFolderData = response.data.folder;
-        setFolders([
-          ...folders,
-          { id: newFolderData._id, name: newFolderData.folder_name },
-        ]);
-        setNewFolder("");
-        setShowFolderInput(false);
-      } catch (error) {
-        setError(error.response?.data?.message || "Error creating folder.");
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
+  //       const newFolderData = response.data.folder;
+  //       setFolders([
+  //         ...folders,
+  //         { id: newFolderData._id, name: newFolderData.folder_name },
+  //       ]);
+  //       setNewFolder("");
+  //       setShowFolderInput(false);
+  //     } catch (error) {
+  //       setError(error.response?.data?.message || "Error creating folder.");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
+  // };
 
   // Add Designer
   // const handleAddDesigner = () => {
   //     if (newDesigner.trim()) {
-  //         setDesigners([...designers, newDesigner]);
+  //         setdesignees([...designees, newDesigner]);
   //         setNewDesigner("");
   //     }
   //     setShowDesignerInput(false);
@@ -519,28 +533,30 @@ const Sidebar = ({ onFolderSelect }) => {
     };
   }, []);
 
-  const fetchDesignees = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.post(
-        `${API_URL}/api/designee/auth-get`,
-        {}, // Empty body if you don't need to send any data in the request body
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setDesigners(response.data.designees); // Assuming response contains designees
-    } catch (error) {
-      // console.error("Error fetching designees:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchDesignees();
-  }, []);
+  // const fetchDesignees = async () => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     const response = await axios.post(
+  //       `${API_URL}/api/designee/auth-get`,
+  //       {}, // Empty body if you don't need to send any data in the request body
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+  //     setdesignees(response.data.designees); // Assuming response contains designees
+  //   } catch (error) {
+  //     // console.error("Error fetching designees:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  
+  
+  
+  
+
 
   // if (loading) {
   //   return <div>Loading...</div>;
@@ -879,47 +895,34 @@ const Sidebar = ({ onFolderSelect }) => {
         </div>
 {/* 
         <h2 className="font-semibold text-[#667085] text-xs mt-2">
-          {designers.length} Designees
+          {designees.length} Designees
           
         </h2> */}
           <h1 className="font-semibold text-[#667085] my-2 text-sm">Designees</h1>
-        <ul>
-          {(viewAllDesigners ? designers : designers.slice(0, 3)).map(
-            (designer, index) => (
-              
-              <NavLink
-              to={`designee/${designer.email}`} 
-              className={({ isActive }) =>
-                `py-1 px-2 my-2 flex items-center rounded cursor-pointer text-sm font-medium ${
-                  isActive
-                    ? "bg-[#0067FF] text-white"
-                    : "text-[#434A60]"
-                }`
-              }
-              >
-                {/* {console.log("gdfcxfscxgfcsxgsfxcsfxcscxgsxcgsxgscxfs", designer.email)} */}
-                
-              <li
-              
-                key={index}
-                className=" flex items-center cursor-pointer"
-                // onClick={handledesigneedashboard}
-                // onClick={() => {setEmail(designer.email)
-                // // console.log("Setttttttttttttttttttt", email)
-                // }
-                // }
-              >
-                
-                <User className="ml-1 mr-2" />
-                {designer.name}
-              
-  
-                
-              </li>
-              </NavLink>
-            )
-          )}
-        </ul>
+          <ul>
+  {(viewAlldesignees ? designes : designes.slice(0, 3)).map(
+    (designer, index) => (
+      <NavLink
+        to={`designee/${designer.to_email_id}`} // Correct path for designee
+        key={index}
+        className={({ isActive }) =>
+          `py-1 px-2 my-2 flex items-center rounded cursor-pointer text-sm font-medium ${
+            isActive ? "bg-[#0067FF] text-white" : "text-[#434A60]"
+          }`
+        }
+      >
+        <li className="flex items-center cursor-pointer">
+          <User className="ml-1 mr-2" />
+          {/* Accessing name inside designee */}
+          {designer.designee?.name || "No Name"}
+        </li>
+      </NavLink>
+    )
+  )}
+</ul>
+
+
+
 
         {/* <button
           onClick={() => {
@@ -944,15 +947,15 @@ const Sidebar = ({ onFolderSelect }) => {
 
             <button
               // onClick={() => {
-              //   setViewAllDesigners(!viewAllDesigners);
+              //   setViewAlldesignees(!viewAlldesignees);
               // }}
               className="flex items-center w-full bg-gray-200 p-1 py-2 text-black !mt-1 !mb-3 rounded-md justify-center border text-xs"
               
             >
-              {/* {viewAllDesigners ? "View Less" : "View All"} */}
+              {/* {viewAlldesignees ? "View Less" : "View All"} */}
              
               {
-                designers.length > 0 ? <span>View All</span> : <span>Add Designee</span>
+                designes.length > 0 ? <span>View All</span> : <span>Add Designee</span>
               }
             </button>
    

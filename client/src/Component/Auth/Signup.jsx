@@ -633,13 +633,26 @@ hideLoading();
         navigate('/subscription');  // Replace '/your-new-page' with the path to your new page
     };
     const handlePhoneNumberChange = (e) => {
-        const value = e.target.value;
-
-        // Allow only numbers and ensure it's exactly 10 digits
-        if (/^\d{0,10}$/.test(value)) {
-            setPhoneNumber(value);
+        let input = e.target.value.replace(/\D/g, ''); // Remove all non-digit characters
+      
+        if (input.length > 10) {
+          input = input.slice(0, 10); // Limit to 10 digits
         }
-    };
+      
+        let formatted = input;
+      
+        if (input.length > 6) {
+          formatted = `(${input.slice(0, 3)})-${input.slice(3, 6)}-${input.slice(6)}`;
+        } else if (input.length > 3) {
+          formatted = `(${input.slice(0, 3)})-${input.slice(3)}`;
+        } else if (input.length > 0) {
+          formatted = `(${input}`;
+        }
+      
+        setPhoneNumber(formatted);
+      };
+
+
     const handleOtpSubmit = () => {
         const otpValue = otp.join(""); // Convert the array to a single string
         if (otpValue.length === 6) {
@@ -1069,99 +1082,98 @@ hideLoading();
           </div>
         </div>
       )}
+{currentStep === 2 && (
+  <div>
+    <div className="flex justify-between">
+      <h2 className="text-xl font-semibold mb-3 text-black">Phone Verification (optional)</h2>     
+      <button
+        className="top-5 text-gray-600 hover:text-black"
+        onClick={() => {
+          setDialogOpen2(false);
+          hideLoading();
+        }}
+      >
+        <X className="h-6 w-6" />
+      </button>
+    </div>
 
-    {currentStep === 2 && (
-      <div>
-        <div className="flex justify-between">
-          <h2 className="text-xl font-semibold mb-3 text-black">Phone Verification (optional)</h2>     
-          <button
-            className="top-5 text-gray-600 hover:text-black"
-            onClick={() => {
-              setDialogOpen2(false);
-              hideLoading();
-            }}
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
-    
-        <hr />
-    
-        <div className="flex items-center space-x-4 mt-4">
-          <div className="text-black">
-            <span className="p-1 px-2 md:p-1 md:px-2.5 bg-blue-500 rounded-2xl text-sm text-black">1</span>
-            <span className="ml-1 md:ml-2 text-xs md:text-lg">Security question</span>
-          </div>
-          <span className="text-black text-xs md:text-lg">&gt;</span>
-          <div className="text-black">
-            <span className="p-1 px-2 md:p-1 md:px-2.5 bg-blue-500 rounded-2xl text-sm text-black">2</span>
-            <span className="ml-1 md:ml-2 text-xs md:text-lg">Phone Verification</span>
-          </div>
-        </div>
-    
-        <div className="flex items-center gap-2 p-4 bg-gray-100 rounded-lg shadow-md mt-4">
-          <select
-            className="border text-black border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            value={countryCode}
-            onChange={handleCountryCodeChange}
-          >
-            <option value="+1">+1 (US)</option>
-            <option value="+91">+91 (IND)</option>
-            <option value="+81">+81 (JPN)</option>
-          </select>
-          <div className="w-full">
-            <input
-              type="text"
-              id="phoneNumber"
-              value={phoneNumber}
-              onChange={handlePhoneNumberChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none text-black"
-              placeholder="Enter phone number"
-            />
-          </div>
-        </div>
-    
-        <div className="flex items-center space-x-2 mt-2">
-          <input
-            type="checkbox"
-            id="acceptTerms"
-            className="h-4 w-4 border-gray-300 rounded"
-            checked={isotpsendbox}
-            onChange={(e) => setIsotpsendbox(e.target.checked)}
-          />
-          <label htmlFor="acceptTerms" className="text-sm text-gray-600">
-          Click here if you’d like to add phone number verification
-    
-          </label>
-        </div>
-    
-        {message && (
-          <div className="mt-4 p-2 border rounded-md text-center bg-gray-100 text-gray-800">
-            {message}
-          </div>
-        )}
-    
-    <button
-      onClick={handleSubmit}
-      disabled={phoneNumber.length < 10 || !isotpsendbox}
-      className={`w-full mt-4 py-2 rounded-md ${
-        phoneNumber.length < 10 || !isotpsendbox
-          ? 'bg-white text-blue-500 border border-blue-500 cursor-not-allowed'
-          : 'bg-blue-500 text-white hover:bg-blue-600'
-      }`}
-    >
-    
-          Next
-        </button>
-    
-        <button
-          onClick={handleFinalSubmit}
-          className="w-full mt-2 py-2 border border-gray-300 text-gray-600 hover:text-black rounded-md"
-        >
-          Skip for now
-        </button>
+    <hr />
+
+    <div className="flex items-center space-x-4 ">
+      {/* <div className="text-black">
+        <span className="p-1 px-2 md:p-1 md:px-2.5 bg-blue-500 rounded-2xl text-sm text-black">1</span>
+        <span className="ml-1 md:ml-2 text-xs md:text-lg">Security question</span>
+      </div> */}
+      {/* <span className="text-black text-xs md:text-lg">&gt;</span> */}
+      {/* <div className="text-black"> */}
+        {/* <span className="p-1 px-2 md:p-1 md:px-2.5 bg-blue-500 rounded-2xl text-sm text-black">2</span> */}
+        {/* <span className="ml-1 md:ml-2 text-xs md:text-lg">Phone Verification</span>
+      </div> */}
+    </div>
+
+    <div className="flex items-center gap-2 p-4 bg-gray-100 rounded-lg shadow-md mt-4">
+      <select
+        className="border text-black border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+        value={countryCode}
+        onChange={handleCountryCodeChange}
+      >
+        <option value="+1">+1 (US)</option>
+        <option value="+91">+91 (IND)</option>
+        <option value="+81">+81 (JPN)</option>
+      </select>
+      <div className="w-full">
+        <input
+          type="text"
+          id="phoneNumber"
+          value={phoneNumber}
+          onChange={handlePhoneNumberChange}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none text-black"
+          placeholder="Enter phone number"
+        />
+      </div>
+    </div>
+
+    <div className="flex items-center space-x-2 mt-2">
+      <input
+        type="checkbox"
+        id="acceptTerms"
+        className="h-4 w-4 border-gray-300 rounded"
+        checked={isotpsendbox}
+        onChange={(e) => setIsotpsendbox(e.target.checked)}
+      />
+<label htmlFor="acceptTerms" className="text-[13px] text-gray-600">
+  I consent to receive security related text messages from Cumulus Inc
+</label>
+
+    </div>
+
+    {message && (
+      <div className="mt-4 p-2 border rounded-md text-center bg-gray-100 text-gray-800">
+        {message}
       </div>
     )}
+
+<button
+  onClick={handleSubmit}
+  disabled={phoneNumber.length < 10 || !isotpsendbox}
+  className={`w-full mt-4 py-2 rounded-md ${
+    phoneNumber.length < 10 || !isotpsendbox
+      ? 'bg-white text-blue-500 border border-blue-500 cursor-not-allowed'
+      : 'bg-blue-500 text-white hover:bg-blue-600'
+  }`}
+>
+
+      Next
+    </button>
+
+    <button
+      onClick={handleFinalSubmit}
+      className="w-full mt-2 py-2 border border-gray-300 text-gray-600 hover:text-black rounded-md"
+    >
+      Skip for now
+    </button>
+  </div>
+)}
 
       {currentStep === 3 && (
         <div>

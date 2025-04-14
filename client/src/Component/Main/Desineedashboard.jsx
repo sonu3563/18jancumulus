@@ -5,6 +5,7 @@ import editicon from "../../assets/editicon.png";
 import voiceIcon from "../../assets/voice.png";
 import useLoadingStore from "../../store/UseLoadingStore";
 import Alert from "../utils/Alerts";
+import defaultprofile from '../../assets/defaulttwo.jpeg'
 import {
   Camera,
   EllipsisVertical,
@@ -23,7 +24,7 @@ import {
   Check
 } from "lucide-react";
 import usePopupStore from "../../store/DesigneeStore";
-
+import { useDesignee } from "../utils/DesigneeContext";
 
 import DesignerPopup from "../Main/Designeepopup";
 import designeeprofile from "../../assets/profile.png";
@@ -33,11 +34,13 @@ import useFolderDeleteStore from "../../store/FolderDeleteStore";
 import { Link, useNavigate } from "react-router-dom";
 // import { Alert } from "react-native";
 const Desineedashboard = ({ searchQuery }) => {
-  const [designees, setDesignees] = useState([]);
+  const { handleAddDesignee  ,fetchdesignes ,designes,handleUpdateDesigneeName,deletedesignee} = useDesignee();
+
+  // const [designes, setdesignes] = useState([]);
   const [popupItem, setPopupItem] = useState(null);
   const { isLoading, showLoading, hideLoading } = useLoadingStore();
   const [preview, setPreview] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [designemail, setDesigneEmail] = useState(true);
   const [editing, isEditing] = useState(false);
   const [error, setError] = useState(null);
@@ -100,26 +103,35 @@ const Desineedashboard = ({ searchQuery }) => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-
-
-
-
-  const handleUpdateDesigneeName = async (name, email) => {
-    try {
-      const response = await axios.post(
-        `${API_URL}/api/designee/add-title-name`,  
-        { email, new_name: name }, 
-        { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } } 
-      );
-
-      if (response.status === 200) {
-        showAlert("success", "success", "Designee Name Updated Successfully.");
-        fetchDesignees();
-      }
-    } catch (error) {
-      // console.error("Error updating title:", error.response?.data || error.message);
+  const formatPhoneNumber = (number) => {
+    if (!number) return '';
+  
+    const digits = number.replace(/\D/g, '').slice(0, 10); // keep only digits and limit to 10
+    if (digits.length === 10) {
+      return `(${digits.slice(0, 3)})-${digits.slice(3, 6)}-${digits.slice(6)}`;
     }
+    return number; // fallback for partial or invalid numbers
   };
+  
+
+
+
+  // const handleUpdateDesigneeName = async (name, email) => {
+  //   try {
+  //     const response = await axios.post(
+  //       `${API_URL}/api/designee/add-title-name`,  
+  //       { email, new_name: name }, 
+  //       { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } } 
+  //     );
+
+  //     if (response.status === 200) {
+  //       showAlert("success", "success", "Designee Name Updated Successfully.");
+  //       fetchdesignes();
+  //     }
+  //   } catch (error) {
+  //     // console.error("Error updating title:", error.response?.data || error.message);
+  //   }
+  // };
 
   const {
     deletebuttonfolder,
@@ -181,7 +193,7 @@ const Desineedashboard = ({ searchQuery }) => {
     }
   }
 
-  const filterdMobileDesigee = designees.filter((designee) =>
+  const filterdMobileDesigee = designes.filter((designee) =>
     (designee.designee.name || '').toLowerCase().includes(MobilesearchQuery.toLowerCase())
   );
 
@@ -201,72 +213,75 @@ const Desineedashboard = ({ searchQuery }) => {
     }
   };
 
-  const handleAddDesignee = async () => {
-    showLoading();
-    const token = localStorage.getItem("token");
+  // const handleAddDesignee = async () => {
 
-    if (!designeeName || !designeePhone || !designeeEmail) {
-      alert("Please fill in all fields.");
-      hideLoading();
-      return;
-    }
+  //   const token = localStorage.getItem("token");
+
+  //   if (!designeeName || !designeePhone || !designeeEmail) {
+  //     // alert("Please fill in all fields.");
+  //     showAlert("warning", "missing fields", "Please fill in all fields.");
+
+  //     hideLoading();
+  //     return;
+  //   }
 
     
 
-    const formData = new FormData();
-    formData.append("profilePicture", file);
-    formData.append("designeeName", designeeName);
-    formData.append("designeePhone", designeePhone);
-    formData.append("designeeEmail", designeeEmail);
+  //   const formData = new FormData();
+  //   formData.append("profilePicture", file);
+  //   formData.append("designeeName", designeeName);
+  //   formData.append("designeePhone", designeePhone);
+  //   formData.append("designeeEmail", designeeEmail);
 
-    try {
-      const response = await axios.post(
-        `${API_URL}/api/designee/add-designee`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+  //   try {
+  //     showLoading();
+  //     const response = await axios.post(
+  //       `${API_URL}/api/designee/add-designee`,
+  //       formData,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "multipart/form-data",
+  //         },
+  //       }
+  //     );
 
       
-      // alert("Designee added successfully.");
-      showAlert("success", "success", "Designee added successfully.");
-      closePopup();
-    } catch (error) {
+  //     // alert("Designee added successfully.");
+  //     showAlert("success", "success", "Designee added successfully.");
+  //     closePopup();
+  //   } catch (error) {
       
-      if (error.response) {
-        if (error.response.status === 409) {
-          // alert("Designee already exists, please check.");
-          showAlert("error", "Failed", "Designee already exists, please check.");
-        } else if (error.response.status === 400) {
-          const serverMessage = error.response.data.message;
-          if (serverMessage === "Designee already exists and is linked to your account.") {
-            // alert("This designee is already linked to your account.");
-            showAlert("error", "Failed", "This designee is already linked to your account.");
-          } else {
-            // alert("Error: " + serverMessage);
-            showAlert("error", "Failed", "Error: " + serverMessage);
-          }
-        } else {
-          // alert("Error adding designee. Please try again later.");
-          showAlert("error","Failed", "Error adding designee. Please try again later.");
-        }
-      } else {
-        // alert("Network error. Please check your connection.");
-        showAlert("error", "Failed","Error adding designee. Please try again later.");
-      }
-    } finally {
-      hideLoading();
-      setDesigneeEmail("");
-      setDesigneeName("");
-      fetchDesignees();
-      setDesigneePhone("");
-      setFile(null);
-    }
-  };
+  //     if (error.response) {
+  //       if (error.response.status === 409) {
+  //         // alert("Designee already exists, please check.");
+  //         showAlert("error", "Failed", "Designee already exists, please check.");
+  //       } else if (error.response.status === 400) {
+  //         const serverMessage = error.response.data.message;
+  //         if (serverMessage === "Designee already exists and is linked to your account.") {
+  //           // alert("This designee is already linked to your account.");
+  //           showAlert("error", "Failed", "This designee is already linked to your account.");
+  //         } else {
+  //           // alert("Error: " + serverMessage);
+  //           showAlert("error", "Failed", "Error: " + serverMessage);
+  //         }
+  //       } else {
+  //         // alert("Error adding designee. Please try again later.");
+  //         showAlert("error","Failed", "Error adding designee. Please try again later.");
+  //       }
+  //     } else {
+  //       // alert("Network error. Please check your connection.");
+  //       showAlert("error", "Failed","Error adding designee. Please try again later.");
+  //     }
+  //   } finally {
+  //     hideLoading();
+  //     setDesigneeEmail("");
+  //     setDesigneeName("");
+  //     fetchdesignes();
+  //     setDesigneePhone("");
+  //     setFile(null);
+  //   }
+  // };
 
   const closeOverlay = () => {
     setOverlayVisible(false); // Close the overlay
@@ -322,7 +337,7 @@ const Desineedashboard = ({ searchQuery }) => {
       if (response.ok) {
         // alert('Access removed successfully!');
         showAlert("success", "success", "Access removed successfully!");
-        fetchDesignees();
+        fetchdesignes();
         setPopupIndex(null)
         // Optionally update the UI here (e.g., removing the file or voice from the list)
       } else {
@@ -365,7 +380,7 @@ const Desineedashboard = ({ searchQuery }) => {
       if (response.ok) {
         alert('Access updated successfully!');
         showAlert("success", "success", "Access Updated Successfully.");
-        fetchDesignees();
+        fetchdesignes();
         setPopupIndex(null);
 
       } else {
@@ -378,31 +393,31 @@ const Desineedashboard = ({ searchQuery }) => {
     }
   };
 
-  const deletedesignee = async (email) => {
+  // const deletedesignee = async (email) => {
     
-    const token = localStorage.getItem("token");
+  //   const token = localStorage.getItem("token");
      
-    try {
-      const response = await axios.delete(
-        `${API_URL}/api/designee/remove-designee`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          data: { email },
-        }
-      );
-      showAlert("success", "success", response.data.message || "Access removed successfully!");
+  //   try {
+  //     const response = await axios.delete(
+  //       `${API_URL}/api/designee/remove-designee`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //         data: { email },
+  //       }
+  //     );
+  //     showAlert("success", "success", response.data.message || "Access removed successfully!");
 
-      fetchDesignees();
-    } catch (error) {
-      // console.error("Error removing access:", error);
-      showAlert("error", "Failed", "Failed to remove access.");
-    } finally {
-      setOpenEdit(null);
-      setShowwarning(false);
-    }
-  };
+  //     fetchdesignes();
+  //   } catch (error) {
+  //     // console.error("Error removing access:", error);
+  //     showAlert("error", "Failed", "Failed to remove access.");
+  //   } finally {
+  //     setOpenEdit(null);
+  //     setShowwarning(false);
+  //   }
+  // };
 
 
   const fetchFileContent = async (fileId) => {
@@ -637,8 +652,8 @@ const Desineedashboard = ({ searchQuery }) => {
       if (response.ok) {
         // alert(data.message || "Access removed successfully.");
         showAlert("success", "success", data.message || "Access removed successfully.");
-        setDesignees(designees.filter((d) => d.to_email_id !== to_email_id));
-        fetchDesignees();
+        // setdesignes(designes.filter((d) => d.to_email_id !== to_email_id));
+        fetchdesignes();
         popupIndex(null);
 
       } else {
@@ -656,42 +671,72 @@ const Desineedashboard = ({ searchQuery }) => {
     }
   };
 
+
+
+
+  const clearInputs = () => {
+    setDesigneeName("");
+    setDesigneePhone("");
+    setDesigneeEmail("");
+    setFile(null);
+  };
+  const handleSubmit = () => {
+    handleAddDesignee({
+      file,
+      designeeName,
+      designeePhone,
+      designeeEmail,
+      showAlert,
+      showLoading,
+      hideLoading,
+      closePopup,
+      clearInputs,
+    });
+    fetchdesignes();
+  };
+
+
   const handleOption = (option) => {
     // Handle the selected option for "Only View", "Edit Access", or "Remove Access"
      
     closePopup(); // Close the popup after the action
   };
-  const fetchDesignees = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setError("Authentication token is missing.");
-      setLoading(false);
-      return;
-    }
-    try {
-      const response = await fetch(
-        `${API_URL}/api/designee/getting-all-shared-files`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      const data = await response.json();
-      setDesignees(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchdesignes = async () => {
+  //   const token = localStorage.getItem("token");
+  //   if (!token) {
+  //     setError("Authentication token is missing.");
+  //     setLoading(false);
+  //     return;
+  //   }
+  //   try {
+  //     const response = await fetch(
+  //       `${API_URL}/api/designee/getting-all-shared-files`,
+  //       {
+  //         method: "GET",
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //           "Content-Type": "application/json",
+  //         },
+  //       }
+  //     );
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //     }
+  //     const data = await response.json();
+  //     setdesignes(data);
+  //     console.log("data",data);
+  //   } catch (err) {
+  //     setError(err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
+
+
   useEffect(() => {
-    fetchDesignees();
+    fetchdesignes();
   }, []);
 
   useEffect(() => {
@@ -739,7 +784,7 @@ const Desineedashboard = ({ searchQuery }) => {
     });
   };
 
-  const filterdDesigee = designees.filter((designee) =>
+  const filterdDesigee = designes.filter((designee) =>
     (designee.designee.name || '').toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -792,7 +837,7 @@ const Desineedashboard = ({ searchQuery }) => {
       />
     </div>
     <div className="flex justify-between">
-      <h1 className="text-2xl font-normal text-[#1F1F1F] mb-4">Your Designees</h1>
+      <h1 className="text-2xl font-normal text-[#1F1F1F] mb-4">Your designes</h1>
       <h1>
         <div className="inline md:hidden">
           <button
@@ -814,7 +859,7 @@ const Desineedashboard = ({ searchQuery }) => {
         Lists of Designee
           </span>
           <div className="bg-gray-100 rounded-full text-lg font-semibold h-8 w-8 p-0.5 px-2.5 ml-2 mb-1">
-          {designees.length}
+          {designes.length}
           </div>
         </div> */}
                   <div className="flex">
@@ -822,7 +867,7 @@ const Desineedashboard = ({ searchQuery }) => {
             Lists of Designee
             </span>
             <div className="bg-gray-100 rounded-full text-lg font-semibold h-8 w-8 p-0.5 px-2.5 ml-2 mb-1">
-              {designees.length}
+              {designes.length}
             </div>
           </div>
         <div className="hidden md:inline">
@@ -892,12 +937,30 @@ const Desineedashboard = ({ searchQuery }) => {
                   Enter Designee Phone Number
                 </label>
                 <input
-                  type="text"
-                  placeholder="Designee Phone Number"
-                  value={designeePhone}
-                  onChange={(e) => setDesigneePhone(e.target.value)}
-                  className="border p-2 rounded w-full mb-3"
-                />
+  type="text"
+  placeholder="Designee Phone Number"
+  value={designeePhone}
+  onChange={(e) => {
+    let input = e.target.value.replace(/\D/g, '');
+
+    if (input.length > 10) {
+      input = input.slice(0, 10);
+    }
+
+    let formatted = input;
+    if (input.length > 6) {
+      formatted = `(${input.slice(0, 3)})-${input.slice(3, 6)}-${input.slice(6)}`;
+    } else if (input.length > 3) {
+      formatted = `(${input.slice(0, 3)})-${input.slice(3)}`;
+    } else if (input.length > 0) {
+      formatted = `(${input}`;
+    }
+
+    setDesigneePhone(formatted);
+  }}
+  className="border p-2 rounded w-full mb-3 text-black"
+/>
+
                 <label className="block mb-2 text-sm font-medium">
                   Enter Designee Email
                 </label>
@@ -916,7 +979,7 @@ const Desineedashboard = ({ searchQuery }) => {
                 </button>
               ) : (
                 <button
-                  onClick={handleAddDesignee}
+                  onClick={handleSubmit}
                   className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition"
                 >
                   Invite to Cumulus
@@ -945,7 +1008,7 @@ const Desineedashboard = ({ searchQuery }) => {
         </h1>
       </div>
 
-      <div className="overflow-x-auto bg-white mt-2 rounded-lg h-[90vh] ">
+      <div className="overflow-x-auto bg-white mt-2 rounded-lg  ">
         <div className="mt-2  bg-white hidden md:flex text-left border-collapse overflow-y-scroll max-h-[80vh] pb-[20px]">
           {/* Table view for larger screens */}
           <table className=" w-full text-left ">
@@ -978,7 +1041,7 @@ const Desineedashboard = ({ searchQuery }) => {
                         className={`bg-gray-100 items-center justify-center px-3 py-1.5 ml-2 rounded-lg ${editable === designee.to_email_id ? 'hidden' : 'flex'}`}>
                         <img
                           className="h-8 w-8 rounded-full object-cover"
-                          src={designee.designee?.profile_picture || "No pic"}
+                          src={designee.designee?.profile_picture || defaultprofile}
                           alt="File Icon"
                         />
 
@@ -1008,7 +1071,7 @@ const Desineedashboard = ({ searchQuery }) => {
                       <div className={'flex'}>
                         <Check className='m-2 text-green-500'  onClick={() => {
                     setEditable(null);
-                            handleUpdateDesigneeName(editDesigneeName, designee.to_email_id);
+                            handleUpdateDesigneeName(editDesigneeName, designee.to_email_id,showAlert);
                           }} />
                         <X className='m-2 text-red-500' onClick={() => setEditable(null)} />
                       </div>
@@ -1021,9 +1084,12 @@ const Desineedashboard = ({ searchQuery }) => {
 
                   {/* Phone Number */}
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <span className="text-gray-600">
-                      {designee.designee?.phone_number || "No phone number"}
-                    </span>
+                  <span className="text-gray-600">
+  {designee.designee?.phone_number
+    ? formatPhoneNumber(designee.designee.phone_number)
+    : "No phone number"}
+</span>
+
                   </td>
 
                   {/* Email */}
@@ -1292,7 +1358,10 @@ const Desineedashboard = ({ searchQuery }) => {
                           className="absolute right-2 mt-14 bg-white border border-gray-300 rounded-lg shadow-xl z-20 w-40 h-32 p-4">
 
                           <div
-                            onClick={() => removeAccess(designee.to_email_id)}
+                            onClick={() => removeAccess(designee.to_email_id, showAlert,
+                              popupIndex,
+                              setDeletePopup,
+                              setOpenEdit)}
                             className="flex items-center space-x-2 mb-4 cursor-pointer">
                             <span className="text-gray-600">
                               <X className="h-5 w-5 text-red-500" />
@@ -1402,7 +1471,7 @@ const Desineedashboard = ({ searchQuery }) => {
                         <Check className='m-2 text-green-500'
                           onClick={() => {
                             setEditable(null);
-                            handleUpdateDesigneeName(editDesigneeName, designee.to_email_id);
+                            handleUpdateDesigneeName(editDesigneeName, designee.to_email_id,showAlert);
                           }}
                         />
                         <X className='m-2 text-red-500' onClick={() => setEditable(null)} />
@@ -1437,7 +1506,7 @@ const Desineedashboard = ({ searchQuery }) => {
                             <img
                               src={
                                 designee.designee?.profile_picture ||
-                                "No pic"
+                                defaultprofile
                               }
                               alt="Profile"
                               className="w-20 h-20 rounded-full object-cover mr-4"
@@ -1525,12 +1594,15 @@ const Desineedashboard = ({ searchQuery }) => {
                               <p onClick={() => setDeletePopup(null)} ><X className="h-5 w-5 text-red-500" /></p></div>
                             <p
                               onClick={() => {
-                                removeAccess(designee.to_email_id)
-                                setDeletePopup(null);
+                                removeAccess(designee.to_email_id, showAlert,
+                                  popupIndex,
+                                  setDeletePopup,
+                                  setOpenEdit)
+                                // setDeletePopup(null);
                               }}
                               className="text-sm font-semibold text-red-500 p-1 hover:text-gray-600 mb-3">Remove Access</p>
                             <p
-                              onClick={() => deletedesignee(designee.to_email_id)}
+                              onClick={() => deletedesignee(designee.to_email_id,showAlert,setOpenEdit,setShowwarning)}
                               className="text-sm font-semibold text-red-500 p-1 mb-3 hover:text-gray-600">Remove Designee</p>
 
                             <p
@@ -1795,7 +1867,7 @@ const Desineedashboard = ({ searchQuery }) => {
                 Cancel
               </button>              <button
                 onClick={() => {
-                  deletedesignee(designemail);
+                  deletedesignee(designemail,showAlert,setOpenEdit,setShowwarning);
                  
                 }}
                 className="bg-blue-500 text-white px-6 py-2 rounded flex items-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500"

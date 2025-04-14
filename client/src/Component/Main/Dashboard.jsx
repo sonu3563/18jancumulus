@@ -2049,14 +2049,14 @@ if (usedStorageInBytes + totalFileSize > totalStorageInBytes) {
             className="bg-[#0067FF] w-52 rounded-2xl my-2 p-3 "
             onClick={() => {
               setInputFileName("");
-              if (isMembershipActive) {
+              // if (isMembershipActive) {
                 setEditing(false);
                 handleUploadClick();
 
-              } else {
-                setDeletebutton1(true);
+              // } else {
+              //   // setDeletebutton1(true);
 
-              }
+              // }
             }}
           >
             <button className="flex items-center text-white px-2">
@@ -3224,7 +3224,7 @@ if (usedStorageInBytes + totalFileSize > totalStorageInBytes) {
               <input
                 type="file"
                 multiple
-                accept=".pdf, .docx, .jpg, .jpeg, .png, .gif, .bmp, .svg, .webp"
+                accept=".pdf, .docx, image/*" 
                 onChange={(e) => handleFileUpload(e.target.files)}
                 className="hidden"
                 id="file-upload"
