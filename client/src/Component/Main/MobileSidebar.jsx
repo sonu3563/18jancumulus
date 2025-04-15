@@ -31,7 +31,8 @@ import aftertlife from "../../assets/affterlife.png";
 import whiteemic from "../../assets/whitemic.png";
 import useFolderDeleteStore from "../../store/FolderDeleteStore";
 import axios from "axios";
-
+import { useFolder } from "../utils/FolderContext";
+import { useDesignee } from "../utils/DesigneeContext";
 
 import {
   Link,
@@ -51,7 +52,7 @@ const MobileSidebar = ({ onFolderSelect }) => {
 
   const { isLoading, showLoading, hideLoading } = useLoadingStore();
   const [errorMessage, setErrorMessage] = useState("");
-  const [folders, setFolders] = useState([]);
+  // const [folders, setFolders] = useState([]);
   const location = useLocation(); // Access current URL for routing
   const [deletebutton, setDeletebutton] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -88,6 +89,9 @@ const MobileSidebar = ({ onFolderSelect }) => {
   // const [designeeEmail, setDesigneeEmail] = useState(""); // Holds the input for designee email
   const [deletebutton2, setDeletebutton2] = useState(false);
   const navigate = useNavigate();
+  const { fetchdesignes, designes } = useDesignee();
+  const [viewAlldesignees, setViewAlldesignees] = useState(false); // Toggles "View All" and "View Less"
+  const {  fetchFolders , folders ,handleAddFolder} = useFolder();
 
   const [openMenuId, setOpenMenuId] = useState(null, () => {
     try {
@@ -99,27 +103,27 @@ const MobileSidebar = ({ onFolderSelect }) => {
     }
   });
 
-  const fetchDesignees = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.post(
-        `${API_URL}/api/designee/auth-get`,
-        {}, // Empty body if you don't need to send any data in the request body
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setDesigners(response.data.designees); // Assuming response contains designees
-    } catch (error) {
-      // console.error("Error fetching designees:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchDesignees = async () => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     const response = await axios.post(
+  //       `${API_URL}/api/designee/auth-get`,
+  //       {}, // Empty body if you don't need to send any data in the request body
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+  //     setDesigners(response.data.designees); // Assuming response contains designees
+  //   } catch (error) {
+  //     // console.error("Error fetching designees:", error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
   useEffect(() => {
-    fetchDesignees();
+    fetchdesignes();
   }, []);
 
   const handleAddDesignerClick = () => {
@@ -336,36 +340,36 @@ const MobileSidebar = ({ onFolderSelect }) => {
     }
   };
   // Fetch folders from API
-  const fetchFolders = async () => {
-    setLoading(true);
-    try {
-      // const token = Cookies.get("token");
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("No token found. Please log in again.");
-        setDeletebutton1(true);
-      }
+  // const fetchFolders = async () => {
+  //   setLoading(true);
+  //   try {
+  //     // const token = Cookies.get("token");
+  //     const token = localStorage.getItem("token");
+  //     if (!token) {
+  //       throw new Error("No token found. Please log in again.");
+  //       setDeletebutton1(true);
+  //     }
 
-      const response = await axios.get(`${API_URL}/api/get-folders`, {
-        headers: {
-          Authorization: `Bearer ${token}`, // Include token in Authorization header
-        },
-      });
+  //     const response = await axios.get(`${API_URL}/api/get-folders`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`, // Include token in Authorization header
+  //       },
+  //     });
 
-      // Extract folder names and _id from the response
-      const foldersData = response.data.map((folder) => ({
-        id: folder._id, // Get _id for folder selection
-        name: folder.folder_name,
-      }));
+  //     // Extract folder names and _id from the response
+  //     const foldersData = response.data.map((folder) => ({
+  //       id: folder._id, // Get _id for folder selection
+  //       name: folder.folder_name,
+  //     }));
 
-      setFolders(foldersData); // Set fetched folders
-    } catch (error) {
-      setError(error.response?.data?.message || "Error fetching folders.");
-      setDeletebutton1(true);
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     setFolders(foldersData); // Set fetched folders
+  //   } catch (error) {
+  //     setError(error.response?.data?.message || "Error fetching folders.");
+  //     setDeletebutton1(true);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // Run on component mount
   useEffect(() => {
@@ -434,40 +438,40 @@ const MobileSidebar = ({ onFolderSelect }) => {
     setErrorMessage("");
   };
   // Add folder
-  const handleAddFolder = async () => {
-    if (newFolder.trim()) {
-      setLoading(true);
-      try {
-        // const token = Cookies.get("token");
-        const token = localStorage.getItem("token");
-        if (!token) {
-          throw new Error("No token found. Please log in again.");
-        }
+  // const handleAddFolder = async () => {
+  //   if (newFolder.trim()) {
+  //     setLoading(true);
+  //     try {
+  //       // const token = Cookies.get("token");
+  //       const token = localStorage.getItem("token");
+  //       if (!token) {
+  //         throw new Error("No token found. Please log in again.");
+  //       }
 
-        const response = await axios.post(
-          `${API_URL}/api/create-folder`,
-          { folder_name: newFolder },
-          {
-            headers: {
-              Authorization: ` Bearer ${token}`,
-            },
-          }
-        );
+  //       const response = await axios.post(
+  //         `${API_URL}/api/create-folder`,
+  //         { folder_name: newFolder },
+  //         {
+  //           headers: {
+  //             Authorization: ` Bearer ${token}`,
+  //           },
+  //         }
+  //       );
 
-        const newFolderData = response.data.folder;
-        setFolders([
-          ...folders,
-          { id: newFolderData._id, name: newFolderData.folder_name },
-        ]);
-        setNewFolder("");
-        setShowFolderInput(false);
-      } catch (error) {
-        setError(error.response?.data?.message || "Error creating folder.");
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
+  //       const newFolderData = response.data.folder;
+  //       setFolders([
+  //         ...folders,
+  //         { id: newFolderData._id, name: newFolderData.folder_name },
+  //       ]);
+  //       setNewFolder("");
+  //       setShowFolderInput(false);
+  //     } catch (error) {
+  //       setError(error.response?.data?.message || "Error creating folder.");
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   }
+  // };
 
   const handleAddDesignee = async () => {
     if (designeeName && designeePhone && designeeEmail) {
@@ -812,7 +816,7 @@ const MobileSidebar = ({ onFolderSelect }) => {
   <button
     className="flex items-center w-full bg-gray-200 py-2 text-black rounded-md mt-1 mb-3 justify-center border text-xs"
   >
-    View All
+    View All Folders
   </button>
 )}
               </Link>
@@ -857,31 +861,25 @@ const MobileSidebar = ({ onFolderSelect }) => {
             </div>
             <h1 className="font-semibold text-[#667085] my-2 text-sm">Designees</h1>
             <ul>
-              {(viewAllDesigners ? designers : designers.slice(0, 3)).map(
-                (designer, index) => (
-                  <NavLink
-                  to={`designee/${designer.email}`} 
-                  className={({ isActive }) =>
-                    `py-1 px-2 my-2 flex items-center rounded cursor-pointer text-sm font-medium ${
-                      isActive
-                        ? "bg-[#0067FF] text-white"
-                        : "text-[#434A60]"
-                    }`
-                  }
-                  >
-                  <li
-                    key={index}
-                    className=" flex items-center cursor-pointer"
-                    onClick={handledesigneedashboard}
-                  >
-            
-                    <User className="mr-2" />
-                    {designer.name}
-                    
-                  </li>
-                  </NavLink>
-                )
-              )}
+            {(viewAlldesignees ? designes : designes.slice(0, 3)).map(
+    (designer, index) => (
+      <NavLink
+        to={`designee/${designer.to_email_id}`} // Correct path for designee
+        key={index}
+        className={({ isActive }) =>
+          `py-1 px-2 my-2 flex items-center rounded cursor-pointer text-sm font-medium ${
+            isActive ? "bg-[#0067FF] text-white" : "text-[#434A60]"
+          }`
+        }
+      >
+        <li className="flex items-center cursor-pointer">
+          <User className="ml-1 mr-2" />
+          {/* Accessing name inside designee */}
+          {designer.designee?.name || "No Name"}
+        </li>
+      </NavLink>
+    )
+  )}
             </ul>
 
             <button
@@ -889,7 +887,9 @@ const MobileSidebar = ({ onFolderSelect }) => {
               className="flex items-center w-full bg-gray-200 py-1 text-black rounded-md mt-1 justify-center border"
             >
               {/* <Plus className="mr-2" /> */}
-              View All
+              {
+                designes.length > 0 ? <span>View All Designee</span> : <span>Add Designee</span>
+              }
             </button>
 
             {/* Voice memo */}

@@ -860,7 +860,7 @@ const Sidebar = ({ onFolderSelect }) => {
   <button
     className="flex items-center w-full bg-gray-200 py-2 text-black rounded-md mt-1 mb-3 justify-center border text-xs"
   >
-    View All
+    View All Folders
   </button>
 )}
 
@@ -955,7 +955,7 @@ const Sidebar = ({ onFolderSelect }) => {
               {/* {viewAlldesignees ? "View Less" : "View All"} */}
              
               {
-                designes.length > 0 ? <span>View All</span> : <span>Add Designee</span>
+                designes.length > 0 ? <span>View All Designee</span> : <span>Add Designee</span>
               }
             </button>
    
