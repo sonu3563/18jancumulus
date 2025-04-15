@@ -27,6 +27,114 @@ const MainLayout = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSessionExpired, setShowSessionExpired] = useState(false);
   const navigate = useNavigate();
+  const [plan, setPlan] = useState("");
+  const [voiceMemoData, setVoiceMemoData] = useState(null);
+  const [planType, setPlanType] = useState("");
+  const [planPrice, setPlanPrice] = useState("");
+  const [userData, setUserData] = useState(null);
+  const [googleDriveData, setGoogleDriveData] = useState(null);
+  const [dropboxData, setDropboxData] = useState(null);
+  const [storageData, setStorageData] = useState(null);
+  const [error, setError] = useState(null);
+  const getUserData = async () => {
+    try {
+        const data = await fetchUserData();
+        console.log("Fetched user data:", data);
+
+        if (!data?.user) {
+            console.error("Invalid user data structure");
+            return;
+        }
+
+        // ✅ Log membership details
+        console.log("User memberships:", data.memberships);
+
+        // Extract latest membership details
+        if (Array.isArray(data.memberships) && data.memberships.length > 0) {
+            const latestMembership = data.memberships[data.memberships.length - 1];
+            console.log("Latest Membership:", latestMembership);
+
+            const subscription = latestMembership?.subscription_id;
+            if (subscription) {
+                const planType = latestMembership.planTime;
+                let planPrice = "N/A";
+
+                if (planType === "monthly" && subscription.cost?.monthly) {
+                    planPrice = `$${subscription.cost.monthly}`;
+                } else if (planType === "yearly" && subscription.cost?.yearly) {
+                    planPrice = `$${subscription.cost.yearly}`;
+                } else if (subscription.cost?.custom_pricing) {
+                    planPrice = "Custom Pricing";
+                }
+
+                console.log("Subscription Plan:", subscription.subscription_name);
+                console.log("Plan Type:", planType);
+                console.log("Plan Price:", planPrice);
+
+                // Check for 'heritage' details in the membership object
+                if (latestMembership.subscription_id.heritageDetails) {
+                    console.log("Heritage Details:", latestMembership.subscription_id.heritageDetails);
+
+                    // Get the first heritage details item (assuming there's only one)
+                    const heritageData = latestMembership.subscription_id.heritageDetails[0];
+
+                    // Check if googledrive_dropbox is true for both Google Drive and Dropbox
+                    const googleDriveData = heritageData.googledrive_dropbox === true; // true if enabled, false otherwise
+                    const dropboxData = heritageData.googledrive_dropbox === true; // true if enabled, false otherwise
+
+                    // Check if voice memo is enabled
+                    const voiceMemoEnabled = heritageData.voice_memo === true; // true if enabled, false otherwise
+
+                    const storageAvailable = heritageData.storage ? `Storage: ${heritageData.storage} GB` : "No storage data available";
+
+                    // Log the heritage plan data
+                    console.log("Storing Google Drive Data:", googleDriveData);
+                    console.log("Storing Dropbox Data:", dropboxData);
+                    console.log(storageAvailable);
+                    console.log(voiceMemoEnabled);
+
+                    // Set separate states for Google Drive, Dropbox, storage, and voice memo
+                    setGoogleDriveData(googleDriveData);
+                    setDropboxData(dropboxData);
+                    setStorageData(storageAvailable);
+                    setVoiceMemoData(voiceMemoEnabled);
+                    console.log("googleDriveData", googleDriveData);
+                    console.log("voiceMemoData", voiceMemoEnabled); // Log updated value
+                    console.log("dropboxData", dropboxData);
+                    console.log("storageAvailable", storageAvailable);
+                } else {
+                    console.log("No heritage details found for the latest membership.");
+                }
+
+                setPlan(subscription.subscription_name);
+                setPlanType(planType);
+                setPlanPrice(planPrice);
+            }
+        } else {
+            console.warn("No membership found.");
+        }
+
+
+
+    } catch (err) {
+        console.error("Error fetching user data:", err.message || err);
+    }
+};
+  
+  useEffect(() => {
+    getUserData();
+  }, []);
+    useEffect(() => {
+      const getUserData = async () => {
+        try {
+          const data = await fetchUserData();
+          setUserData(data);
+        } catch (err) {
+          setError(err.message || "Failed to fetch user data");
+        }
+      };
+      getUserData();
+    }, []);
 
   const handleFolderSelect = (folderId) => {
     setSelectedFolder(folderId);
@@ -131,7 +239,9 @@ const MainLayout = () => {
                             <Route path="/Activity" element={<Activity searchQuery={searchQuery} setSearchQuery={setSearchQuery} />} />
                             <Route path="/SharedFiles" element={<SharedFiles />} />
                             <Route path="/Afterlifeaccess" element={<Afterlifeaccess searchQuery={searchQuery} setSearchQuery={setSearchQuery} />} />
-                            <Route path="/Voicememo" element={<Voicememo searchQuery={searchQuery} setSearchQuery={setSearchQuery} />} />
+                            {(plan === "Legacy (Premium)" || voiceMemoData === true) && (
+                              <Route path="/Voicememo" element={<Voicememo searchQuery={searchQuery} setSearchQuery={setSearchQuery} />} />
+                            )}
                             <Route path="/my-profile" element={<Profile />} />
                             <Route path="/designee/:email" element={<Designee folderId={selectedFolder} onFolderSelect={handleFolderSelect} searchQuery={searchQuery} setSearchQuery={setSearchQuery} />} />
                             <Route path="/help" element={<Help />} />
