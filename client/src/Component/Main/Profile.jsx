@@ -1778,19 +1778,24 @@ const handleChangePassword = async () => {
       </div>
 
       {/* Checkbox */}
-      <div className="flex items-center space-x-2 mt-3">
-        <input
-          type="checkbox"
-          id="acceptTerms"
-          className="h-4 w-4 border-gray-300 rounded"
-          checked={isotpsendbox}
-          onChange={(e) => setIsotpsendbox(e.target.checked)}
-        />
- <label htmlFor="acceptTerms" className="text-[13px] text-gray-600 ">
-      I consent to receive security related text messages from Cumulus Inc. 
-      I understand that Cumulus will send me a code for two factor authentication during each sign-in. Message rates may apply.
-    </label>
-      </div>
+        <div className="flex space-x-2 mt-2 py-5 px-0 items-start">
+                  <input
+                    type="checkbox"
+                    id="acceptTerms"
+                    className="h-4 w-4 border-gray-300 rounded mt-1"
+                    checked={isotpsendbox}
+                    onChange={(e) => setIsotpsendbox(e.target.checked)}
+                  />
+                  <label
+                    htmlFor="acceptTerms"
+                    className="text-[12px] leading-[20px] text-gray-600 "
+                  >
+                    I consent to receive security related text messages from
+                    Cumulus Inc. I understand that Cumulus will send me a code
+                    for two factor authentication during each sign-in. Message
+                    rates may apply.
+                  </label>
+                </div>
 
                 <div className="flex justify-center mt-2">
   <span className="text-[13px] text-blue-600 underline decoration-blue-600 mr-1" onClick={() => navigate("/privacy")}>
