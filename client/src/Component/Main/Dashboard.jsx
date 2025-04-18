@@ -2043,7 +2043,7 @@ if (usedStorageInBytes + totalFileSize > totalStorageInBytes) {
         />
       </div>
 
-      {folderId !== 1 && folderId !== "1" && (
+      {folderId !== 1 && folderId !== "1" && folderId !== 0 && folderId !== "0" && (
         <div className="flex flex-col mt-6">
           <h1 className="text-2xl font-normal text-[#1F1F1F]">Welcome to Cumulus</h1>
 
