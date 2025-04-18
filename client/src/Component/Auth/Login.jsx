@@ -896,11 +896,20 @@ const Login = ({ name = "Daniel" }) => {
         onChange={(e) => setIsotpsendbox(e.target.checked)}
       />
 <label htmlFor="acceptTerms" className="text-[13px] text-gray-600 ">
-  I consent to receive security related text messages from Cumulus Inc
+  I consent to receive security related text messages from Cumulus Inc. 
+  I understand that Cumulus will send me a code for two factor authentication during each sign-in. Message rates may apply.
 </label>
 
 
     </div>
+       <div className="flex justify-center mt-2">
+  <span className="text-[13px] text-blue-600 underline decoration-blue-600 mr-1" onClick={() => navigate("/privacy")}>
+    Privacy Policy
+  </span>
+  <span className="text-[13px] text-blue-600 underline decoration-blue-600" onClick={() => navigate("/terms")}>
+    | Terms & Conditions
+  </span>
+</div>
 
     {message && (
       <div className="mt-4 p-2 border rounded-md text-center bg-gray-100 text-gray-800">
