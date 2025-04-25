@@ -273,6 +273,9 @@ const { Activity } = require("../models/activityModel");
       const fromEmail = fromUser.email;
   
     const results = [];
+
+    const alreadySharedFiles = new Set();
+    const alreadySharedVoices = new Set();
   
     for (const email of to_email_id) {
       try {
@@ -309,11 +312,25 @@ const { Activity } = require("../models/activityModel");
               continue;
             }
   
-            const existingFile = nominee.files.find(f => f.file_id.toString() === file_id);
-            if (existingFile) {
-              existingFile.access = access || existingFile.access;
+            // const existingFile = nominee.files.find(f => f.file_id.toString() === file_id);
+            // if (existingFile) {
+            //   existingFile.access = access || existingFile.access;
+            // } else {
+            //   nominee.files.push({ file_id, access });
+            // }
+
+            const alreadyFile = nominee.files.some(f => f.file_id.toString() === file_id);
+            if (alreadyFile) {
+              alreadySharedFiles.add(file_id);
             } else {
               nominee.files.push({ file_id, access });
+              results.push({
+                email,
+                item_type: "file",
+                item_id: file_id,
+                status: "success",
+                message: `File ${file_id} shared with ${email}.`
+              });
             }
             // Log file activity
             fileActivities.push({
@@ -334,11 +351,25 @@ const { Activity } = require("../models/activityModel");
               continue;
             }
   
-            const existingVoice = nominee.voices.find(v => v.voice_id.toString() === voice_id);
-            if (existingVoice) {
-              existingVoice.access = access || existingVoice.access;
+            // const existingVoice = nominee.voices.find(v => v.voice_id.toString() === voice_id);
+            // if (existingVoice) {
+            //   existingVoice.access = access || existingVoice.access;
+            // } else {
+            //   nominee.voices.push({ voice_id, access });
+            // }
+
+            const alreadyVoice = nominee.voices.some(v => v.voice_id.toString() === voice_id);
+            if (alreadyVoice) {
+              alreadySharedVoices.add(voice_id);
             } else {
               nominee.voices.push({ voice_id, access });
+              results.push({
+                email,
+                item_type: "voice",
+                item_id: voice_id,
+                status: "success",
+                message: `Voice ${voice_id} shared with ${email}.`
+              });
             }
              // Log voice activity
              voiceActivities.push({
@@ -398,6 +429,15 @@ const { Activity } = require("../models/activityModel");
           error: error.message
         });
       }
+    }
+
+    if (alreadySharedFiles.size || alreadySharedVoices.size) {
+      const filesList = Array.from(alreadySharedFiles).join(", ");
+      const voicesList = Array.from(alreadySharedVoices).join(", ");
+      let summary = "These items were already shared: ";
+      if (filesList) summary += `Files [${filesList}] `;
+      if (voicesList) summary += `Voices [${voicesList}]`;
+      results.push({ status: "skipped_summary", message: summary.trim() });
     }
   
     res.status(200).json({ message: "Sharing process completed.", results });
@@ -778,6 +818,17 @@ const { Activity } = require("../models/activityModel");
   
       const result = await Promise.all(sharedFiles.map(async (sharedFile) => {
         const designee = await Designee.findOne({ email: sharedFile.to_email_id });
+
+        // Determine displayName based on title array
+      let displayName = designee.name;
+      if (designee.title && designee.title.length > 0) {
+        const titleEntry = designee.title.find(
+          title => title.from_user_id.toString() === from_user_id.toString()
+        );
+        if (titleEntry && titleEntry.new_name) {
+          displayName = titleEntry.new_name;
+        }
+      }
   
         return {
           to_email_id: sharedFile.to_email_id,
@@ -795,7 +846,7 @@ const { Activity } = require("../models/activityModel");
             access: voice.access,
           })),
           designee: designee ? {
-            name: designee.name,
+            name: displayName,
             phone_number: designee.phone_number,
           } : { name: 'Unknown', phone_number: 'N/A' },
         };

@@ -1093,7 +1093,7 @@ const Sidebar = ({ onFolderSelect }) => {
             to="/afterlifeaccess"
             onClick={() => setOpenMenuId(null)}
             className={({ isActive }) =>
-              `flex cursor-pointer p-2 rounded mb-3 ${
+                  `py-1 px-2 my-2 flex items-center rounded cursor-pointer text-sm font-medium ${
                 isActive ? "bg-[#0067FF] text-white" : "text-[#434A60]"
               }`
             }
@@ -1121,7 +1121,7 @@ const Sidebar = ({ onFolderSelect }) => {
             to="/SharedFiles"
             onClick={() => setOpenMenuId(null)}
             className={({ isActive }) =>
-              `flex mb-3 cursor-pointer p-2 rounded  ${
+              `py-1 px-2 my-2 flex items-center rounded cursor-pointer text-sm font-medium ${
                 isActive ? "bg-[#0067FF] text-white" : "text-[#434A60]"
               }`
             }

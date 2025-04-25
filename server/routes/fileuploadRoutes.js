@@ -586,7 +586,7 @@ router.post("/get-files", authenticateToken, async (req, res) => {
       });
       if (currentFolder) {
         const parentName = decryptField(currentFolder.folder_name, currentFolder.iv_folder_name);
-        pathParts.unshift(parentName); // Add to the beginning
+        pathParts.unshift(parentName); 
       } else {
         break;
       }
@@ -608,6 +608,15 @@ router.post("/get-files", authenticateToken, async (req, res) => {
           sharedFileRecords.map(async (record) => {
             const designee = await Designee.findOne({ email: record.to_email_id });
 
+            // Check title array for new_name if from_user_id matches
+            let designeeName = designee?.name || "Unknown"; // Default name
+            if (designee?.title && designee.title.length > 0) {
+              const titleRecord = designee.title.find(title => title.from_user_id.toString() === user_id.toString());
+              if (titleRecord && titleRecord.new_name) {
+                designeeName = titleRecord.new_name;
+              }
+            }
+
             const fileAccess = record.files.find(
               (f) => f.file_id.toString() === file._id.toString()
             )?.access;
@@ -616,10 +625,10 @@ router.post("/get-files", authenticateToken, async (req, res) => {
               ? decryptField(designee.profile.profilePicture, designee.profile.iv)
               : null;
 
-            return {
+            return {  
               designee: {
                 email: designee?.email || record.to_email_id,
-                name: designee?.name || "Unknown",
+                name: designeeName,
                 phone_number: designee?.phone_number || "N/A",
                 profile_picture: profilePicture || null,
               },
@@ -703,6 +712,15 @@ router.get("/get-all-files", authenticateToken, async (req, res) => {
       return Promise.all(
         sharedFileRecords.map(async (record) => {
           const designee = await Designee.findOne({ email: record.to_email_id }).lean();
+          let designeeName = designee?.name || "Unknown"; // Default name
+
+          // Check title array for new_name if from_user_id matches
+          if (designee?.title && designee.title.length > 0) {
+            const titleRecord = designee.title.find(title => title.from_user_id.toString() === user_id.toString());
+            if (titleRecord && titleRecord.new_name) {
+              designeeName = titleRecord.new_name;
+            }
+          }
           // Find access information for the current file
           const fileAccess = record.files.find(
             (f) => f.file_id.toString() === fileId.toString()
@@ -714,7 +732,7 @@ router.get("/get-all-files", authenticateToken, async (req, res) => {
           return {
             designee: {
               email: designee?.email || record.to_email_id, // Use `to_email_id` if Designee not found
-              name: designee?.name || "Unknown",
+              name: designeeName,
               phone_number: designee?.phone_number || "N/A",
               profile_picture: profilePicture || null,
             },

@@ -913,34 +913,32 @@ const saveRecording = async () => {
 
   const shareFile = async (voice_id) => {
     showLoading();
+  
     if (!selectedEmails.length) {
-      // console.error("No designees selected.");
+      showAlert("warning", "Please Select Email", "No designees selected");
       return;
     }
+  
     const token = localStorage.getItem("token");
-    // console.log("token", token);
-    // console.log("to_email_id", selectedEmails);
-    // console.log("voice_id", voice_id);
-    // console.log("notify", notify);
-    // console.log("message", message);
     if (!selectedEmails || !token) {
-      showAlert("warning", "Please Select Email ", "No designees selected");
-      // console.error("Missing required fields: to_email_id or token.");
+      showAlert("warning", "Missing Info", "Token or Emails are missing.");
       return;
     }
-
-
+  
+    // Ensure voice_id is an array
+    const voicesToShare = Array.isArray(voice_id) ? voice_id : [voice_id];
+  
     const data = {
-      voice_id,
-      to_email_id: selectedEmails, // Pass the array of selected emails  message
+      voice_id: voicesToShare,
+      to_email_id: selectedEmails,
       access: "view",
       notify: notify,
-      message: message, // Adjust as per your API's requirements
+      message: message,
     };
-
+  
     try {
       const response = await axios.post(
-        `${API_URL}/api/designee/share-voices`, // Backend endpoint
+        `${API_URL}/api/designee/share-voices`,
         data,
         {
           headers: {
@@ -948,19 +946,34 @@ const saveRecording = async () => {
           },
         }
       );
-
-      showAlert("success", "Success ", "Voice memo has been shared successfully!");
-      // Handle the response, if needed
-      // console.log("File shared successfully:", response.data);
-    } catch (error) {
   
-      showAlert("error", "Sharing Failed ", "An error occurred while sharing the voice. Please try again.");
-      // console.error("Error sharing file:", error);
+      const results = response.data?.results || [];
+  
+      if (results.length > 0) {
+        for (const result of results) {
+          const { email, voice_id, status, message } = result;
+  
+          if (status === "skipped") {
+            showAlert("error", "Already Shared", `Voice ${voice_id} already shared with ${email}`);
+          } else if (status === "skipped_summary") {
+            showAlert("error", "Summary", message);
+          } else {
+            showAlert("success", "Shared", `Voice ${voice_id} shared with ${email}`);
+          }
+  
+          await new Promise(resolve => setTimeout(resolve, 700)); // Delay between alerts
+        }
+      } else {
+        showAlert("success", "Success", "Voice memo has been shared successfully!");
+      }
+    } catch (error) {
+      showAlert("error", "Sharing Failed", "An error occurred while sharing the voice. Please try again.");
     } finally {
       hideLoading();
       setShareFolderModal(false);
     }
   };
+  
 
   useEffect(() => {
     if (canvasRef.current && frequencyData.length) {

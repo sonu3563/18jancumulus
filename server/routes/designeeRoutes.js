@@ -465,29 +465,37 @@ router.delete("/remove-designee", authenticateToken, async (req, res) => {
 router.post("/share-files", authenticateToken, async (req, res) => {
   const { to_email_id, file_id, access, notify, message } = req.body;
   const from_user_id = req.user.user_id;
+
   // Input validation
   if (!to_email_id || !Array.isArray(to_email_id) || !file_id || !Array.isArray(file_id)) {
     return res.status(400).json({ message: "Designee emails (array) aur file IDs (array) zaroori hain." });
   }
+
   const results = [];
   for (const email of to_email_id) {
+    const skippedFiles = []; // Track skipped files for the current email
+
     try {
       const fromUser = await Userlogin.findById(from_user_id);
       if (!fromUser) {
         return res.status(404).json({ message: "Sender user not found." });
       }
+
       const fromEmail = fromUser.email;
+
       // Check if the designee exists
       const designee = await Designee.findOne({ email });
       if (!designee) {
         results.push({ email, status: "failed", message: "Designee not found." });
         continue;
       }
+
       // Check if the user is authorized to share files with the designee
       if (!designee.from_user_id.includes(from_user_id)) {
         results.push({ email, status: "failed", message: "Not authorized to share files with this designee." });
         continue;
       }
+
       // Find or create a UserSharedFile entry
       let userSharedFile = await UserSharedFile.findOne({ from_user_id, to_email_id: email });
       if (!userSharedFile) {
@@ -497,6 +505,7 @@ router.post("/share-files", authenticateToken, async (req, res) => {
           files: [],
         });
       }
+
       // Loop through the file_id array and handle each file
       for (const id of file_id) {
         // Check if the file exists
@@ -505,23 +514,28 @@ router.post("/share-files", authenticateToken, async (req, res) => {
           results.push({ email, status: "failed", message: `File with ID ${id} does not exist.` });
           continue;
         }
+
         // Check if the file already exists in the files array
         const existingFile = userSharedFile.files.find(f => f.file_id.toString() === id);
         if (existingFile) {
-          // Update access if the file already exists
-          existingFile.access = access || existingFile.access;
+          // Track skipped file
+          skippedFiles.push(id);
+    
+          continue;
         } else {
           // Add the new file to the files array
           userSharedFile.files.push({ file_id: id, access });
         }
-         // Add the file sharing activity to the Activity schema
-         const fileSharingActivity = {
+
+        // Add the file sharing activity to the Activity schema
+        const fileSharingActivity = {
           fileId: id,
           action: `Shared file with ${email}`,
           timestamp: new Date(),
         };
+
         // Find the activity document by recipient email (toEmail)
-        let activity = await Activity.findOne({ toEmail: fromEmail });  // Use fromUser's email as the toEmail
+        let activity = await Activity.findOne({ toEmail: fromEmail });
         if (activity) {
           activity.fileActivities.push(fileSharingActivity); // Append to existing fileActivities array
         } else {
@@ -531,11 +545,23 @@ router.post("/share-files", authenticateToken, async (req, res) => {
             fileActivities: [fileSharingActivity],
           });
         }
-        // Save the activity to the database
+
         await activity.save();
       }
+
+      // After looping through all files, check if all were skipped
+      if (skippedFiles.length === file_id.length) {
+        // Add a summary entry of skipped files
+        results.push({
+          email,
+          status: "skipped",
+          message: `Files ${skippedFiles.join(", ")} were already shared to ${email}.`
+        });
+      }
+
       // Save the updated or new UserSharedFile
       await userSharedFile.save();
+
       // Send notification email if requested
       if (notify) {
         const otp = designee.password;
@@ -565,13 +591,13 @@ router.post("/share-files", authenticateToken, async (req, res) => {
       results.push({ email, status: "failed", message: "Error sharing file or sending email.", error: error.message });
     }
   }
+
   res.status(200).json({ message: "File sharing process completed.", results });
 });
 
 
 
 
-// API to get shared files for a particular designee (NON CUMULUS USER)
 router.post("/get-shared-files-nc", async (req, res) => {
   try {
     const { to_email_id } = req.body;
@@ -732,6 +758,18 @@ router.post("/auth-get", authenticateToken, async (req, res) => {
         const decryptedLink = decryptField(designee.profile.profilePicture, designee.profile.iv);
         designee.profile.profilePicture = decryptedLink;
       }
+
+       // Override name with new_name from title if from_user_id matches
+       let displayName = designee.name;
+       if (designee.title && designee.title.length > 0) {
+         const titleRecord = designee.title.find(
+           title => title.from_user_id.toString() === user_id.toString()
+         );
+         if (titleRecord && titleRecord.new_name) {
+           displayName = titleRecord.new_name;
+         }
+       }
+       designee.name = displayName;
     });
 
 
@@ -746,35 +784,44 @@ router.post("/auth-get", authenticateToken, async (req, res) => {
 });
 
 
-
 router.post("/share-voices", authenticateToken, async (req, res) => {
-  const { to_email_id, voice_id, access, notify, message  } = req.body; 
-  const from_user_id = req.user.user_id; 
-  if (!to_email_id || !Array.isArray(to_email_id) || !voice_id) {
-    return res.status(400).json({ message: "Designee emails (array) and voice ID are required." });
+  let { to_email_id, voice_id, access, notify, message } = req.body;
+  const from_user_id = req.user.user_id;
+
+  // Normalize inputs
+  if (!to_email_id || !Array.isArray(to_email_id)) {
+    return res
+      .status(400)
+      .json({ message: "Designee emails (array) and voice ID(s) are required." });
   }
+  // allow single ID or array of IDs
+  const voiceIds = Array.isArray(voice_id) ? voice_id : [voice_id];
+
   const results = [];
+  const alreadySharedVoices = new Set();
+
   for (const email of to_email_id) {
     try {
+      // basic sender → designee checks
       const fromUser = await Userlogin.findById(from_user_id);
-      if (!fromUser) {
-        return res.status(404).json({ message: "Sender user not found." });
-      }
+      if (!fromUser) return res.status(404).json({ message: "Sender user not found." });
       const fromEmail = fromUser.email;
+
       const designee = await Designee.findOne({ email });
       if (!designee) {
         results.push({ email, status: "failed", message: "Designee not found." });
         continue;
       }
       if (!designee.from_user_id.includes(from_user_id)) {
-        results.push({ email, status: "failed", message: "Not authorized to share voices with this designee." });
+        results.push({
+          email,
+          status: "failed",
+          message: "Not authorized to share voices with this designee.",
+        });
         continue;
       }
-      const voiceExists = await Voice.findById(voice_id);
-      if (!voiceExists) {
-        results.push({ email, status: "failed", message: "Invalid voice ID." });
-        continue;
-      }
+
+      // load or init shared-record
       let userSharedFile = await UserSharedFile.findOne({ from_user_id, to_email_id: email });
       if (!userSharedFile) {
         userSharedFile = new UserSharedFile({
@@ -783,60 +830,106 @@ router.post("/share-voices", authenticateToken, async (req, res) => {
           voices: [],
         });
       }
-      const existingVoice = userSharedFile.voices.find(v => v.voice_id.toString() === voice_id);
-      if (existingVoice) {
-        existingVoice.access = access || existingVoice.access;
-      } else {
-        userSharedFile.voices.push({ voice_id, access });
-      }
-      await userSharedFile.save();
-      const voiceSharingActivity = {
-        voiceId: voice_id,
-        action: `Shared voice memo with ${email}`,
-        timestamp: new Date(),
-      };
-  
-      let activity = await Activity.findOne({ toEmail: fromEmail }); 
-      if (activity) {
-        activity.voiceActivities.push(voiceSharingActivity);
-      } else {
-       
-        activity = new Activity({
-          toEmail: fromEmail, 
-          voiceActivities: [voiceSharingActivity],
+
+      for (const vid of voiceIds) {
+        // validate voice exists
+        const voiceExists = await Voice.findById(vid);
+        if (!voiceExists) {
+          results.push({ email, voice_id: vid, status: "failed", message: "Invalid voice ID." });
+          continue;
+        }
+
+        // check skip
+        const already = userSharedFile.voices.some(v => v.voice_id.toString() === vid);
+        if (already) {
+          // record for summary
+          alreadySharedVoices.add(vid);
+          results.push({
+            email,
+            voice_id: vid,
+            status: "skipped",
+            message: `Voice memo ${vid} already shared with ${email}.`,
+          });
+          continue;
+        }
+
+        // share new
+        userSharedFile.voices.push({ voice_id: vid, access });
+        results.push({
+          email,
+          voice_id: vid,
+          status: "success",
+          message: `Voice memo ${vid} shared with ${email}.`,
         });
       }
+
+      // save once per email
+      await userSharedFile.save();
+
+      // log one activity per new voice
+      const newActivities = userSharedFile.voices
+        .slice(-voiceIds.length) // rough slice of last added IDs
+        .map(v => ({
+          voiceId: v.voice_id,
+          action: `Shared voice memo with ${email}`,
+          timestamp: new Date(),
+        }));
+      let activity = await Activity.findOne({ toEmail: fromEmail });
+      if (!activity) {
+        activity = new Activity({ toEmail: fromEmail, voiceActivities: [] });
+      }
+      activity.voiceActivities.push(...newActivities);
       await activity.save();
-      if (notify) {
+
+      // email once if any new shares and notify is true
+      const anyNew = results.some(r => r.email === email && r.status === "success");
+      if (notify && anyNew) {
         const otp = designee.password;
         const body = `
           Hello ${designee.name},<br/><br/>
           ${message ? `Message from the sender: <b>${message}</b><br/><br/>` : ''}
-          Please click on the link below to access shared voice memos on Cumulus.<br/><br/>
+          You have new shared voice memos on Cumulus:<br/><ul>
+          ${results
+            .filter(r => r.email === email && r.status === "success")
+            .map(r => `<li>ID: ${r.voice_id}</li>`)
+            .join('')}
+          </ul>
           <a href='${frontend_URL}/shared/SharedVoices?email=${email}&created_by=${from_user_id}'>
-            ${frontend_URL}/shared/SharedVoices?email=${email}&created_by=${from_user_id}
+            View Shared Voices
           </a>
           <br/><br/>
           Your Password is: ${otp}<br/><br/>
-          Thanks,<br/>
-          Cumulus Team!
+          Thanks,<br/>Cumulus Team!
         `;
-        await sendEmail({
-          to: email,
-          subject: "Voice Sharing Invitation",
-          body,
-        });
-        results.push({ email, status: "success", message: "Voice memo shared and email sent with OTP." });
-      } else {
-        results.push({ email, status: "success", message: "Voice memo shared successfully. No email sent." });
+        await sendEmail({ to: email, subject: "New Voice Sharing Invitation", body });
+        // annotate in results
+        results
+          .filter(r => r.email === email && r.status === "success")
+          .forEach(r => (r.message += " Email sent with OTP."));
       }
+
     } catch (error) {
-      console.error(`Error sharing voice memo with ${email}:`, error);
-      results.push({ email, status: "failed", message: "Error sharing voice memo or sending email.", error: error.message });
+      console.error(`Error sharing with ${email}:`, error);
+      results.push({
+        email,
+        status: "failed",
+        message: "Error during share.",
+        error: error.message,
+      });
     }
   }
-  res.status(200).json({ message: "Voice sharing process completed.", results });
+
+  if (alreadySharedVoices.size) {
+    const voicesList = Array.from(alreadySharedVoices).join(", ");
+    results.push({
+      status: "skipped_summary",
+      message: `These voice memos were already shared: [${voicesList}]`
+    });
+  }
+
+  return res.status(200).json({ message: "Voice sharing process completed.", results });
 });
+
 
 router.post("/get-shared-voices-nc", async (req, res) => {
   try {
@@ -1208,7 +1301,19 @@ router.get('/getting-all-shared-files', authenticateToken, async (req, res) => {
       const sharedFile = sharedFiles.find(file => file.to_email_id === designee.email);
 
       const titleEntry = designee.title.find(title => title.from_user_id.toString() === from_user_id);
-      const displayName = titleEntry ? titleEntry.new_name : designee.name; 
+      // const displayName = titleEntry ? titleEntry.new_name : designee.name; 
+
+
+       // Determine displayName based on title array
+       let displayName = designee.name;
+       if (designee.title && designee.title.length > 0) {
+         const titleEntry = designee.title.find(
+           title => title.from_user_id.toString() === from_user_id.toString()
+         );
+         if (titleEntry && titleEntry.new_name) {
+           displayName = titleEntry.new_name;
+         }
+       }
 
       if (!sharedFile) {
         return {
@@ -1297,6 +1402,17 @@ router.post('/assignments', authenticateToken, async (req, res) => {
     const responseData = designees.map(designee => {
       const sharedFile = userSharedFiles.find(file => file.to_email_id === designee.email);
 
+       // Determine base name or override from title array
+       let displayName = designee.name;
+       if (designee.title && designee.title.length > 0) {
+         const titleRecord = designee.title.find(
+           title => title.from_user_id.toString() === user_id.toString()
+         );
+         if (titleRecord && titleRecord.new_name) {
+           displayName = titleRecord.new_name;
+         }
+       }
+
       // Find access for the specific file_id or voice_id
       const fileAccess = sharedFile.files
         .filter(file => file.file_id && file.file_id._id.toString() === file_id)
@@ -1308,6 +1424,7 @@ router.post('/assignments', authenticateToken, async (req, res) => {
 
       return {
         ...designee.toObject(), // Convert Mongoose document to plain object
+        name: displayName,
         access: fileAccess.length > 0 ? fileAccess[0] : voiceAccess[0], // Single access for the specific file or voice
       };
     });
@@ -1443,27 +1560,24 @@ router.delete("/delete-voice-file-data", authenticateToken, async (req, res) => 
       return res.status(404).json({ message: "Shared data not found for the specified user and email." });
     }
 
-    // Deleting file if file_id is provided
     if (file_id) {
       const fileIndex = sharedRecord.files.findIndex(file => file.file_id.toString() === file_id);
       if (fileIndex !== -1) {
-        sharedRecord.files.splice(fileIndex, 1); // Remove the file from the array
+        sharedRecord.files.splice(fileIndex, 1); 
       } else {
         return res.status(404).json({ message: "File not found in the shared data." });
       }
     }
 
-    // Deleting voice if voice_id is provided
     if (voice_id) {
       const voiceIndex = sharedRecord.voices.findIndex(voice => voice.voice_id.toString() === voice_id);
       if (voiceIndex !== -1) {
-        sharedRecord.voices.splice(voiceIndex, 1); // Remove the voice from the array
+        sharedRecord.voices.splice(voiceIndex, 1); 
       } else {
         return res.status(404).json({ message: "Voice not found in the shared data." });
       }
     }
 
-    // Save the updated shared data
     await sharedRecord.save();
 
     res.status(200).json({ message: "Shared file or voice deleted successfully." });

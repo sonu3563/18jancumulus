@@ -525,10 +525,12 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery }) => {
         // Remove the user from the list if the access is removed successfully
         const updatedUsers = users.filter((_, i) => i !== index);
         setUsers(updatedUsers);
+        showAlert("success", "success", "Access removed  Successfully.");
         // alert('Access removed successfully');
         setShowDropdown(null);
       }
     } catch (error) {
+      showAlert("Failed to update permission. Please try again.");
       // console.error('Error removing user access:', error);
       // alert('Failed to remove access. Please try again.');
     }
@@ -669,7 +671,7 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery }) => {
 
   const handleClick = () => {
     // console.log("file hdbjcbhbckdnchbcb", file);
-    shareFile(file); // Calling the share function after setting the file ID
+    shareFile(files); // Calling the share function after setting the file ID
   };
 
   const handleUsersClick = (fileId) => {
@@ -1507,6 +1509,9 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery }) => {
       setUploadStatus(error?.response?.data?.error || "Error uploading files.");
     } finally {
       hideLoading();
+      // setSelectedFile("");
+      // setUploadQueue([]);
+      // setIsUploading(false);
     }
   };
 
@@ -1640,79 +1645,67 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery }) => {
 
 
   const deleteFile = async (file_id) => {
-    // console.log("upcomming folder id", deletefolderid);
-    // const token = Cookies.get('token');
     const token = localStorage.getItem("token");
-
+  
     const selectedFolder =
       !folderId || folderId === "0" ? deletefolderid : folderId;
-    // console.log("upcoming selectedFolder", selectedFolder);
-    // Debugging logs
-
-    // console.log("Token:", token);
-
-    // console.log("Selected Folder ID:", selectedFolder);
-
-    // console.log("File ID to delete33333:", file_id);
-
-    // Check for missing values
-
-    if (!token) {
-      // setMessage("No token found. Please log in.");
-
-      // console.error("Missing token");
-
-      return;
-    }
-
-    if (!selectedFolder) {
-      // setMessage("No folder selected.");
-      // setAlert({ variant: "warning", title: "Select File", message: "No File selected." });
-      // console.error("Missing folderId");
-
-      return;
-    }
-
+  
+    if (!token) return;
+  
+    if (!selectedFolder) return;
+  
     if (!file_id) {
-      // setMessage("No file selected to delete.");
       showAlert({
         variant: "warning",
         title: "Select File",
         message: "No File selected.",
       });
-      // console.error("Missing file_id");
-
       return;
     }
-
+  
     try {
       const response = await axios.post(
         `${API_URL}/api/delete-file`,
-
-        { folder_id: selectedFolder, file_id },
-
         {
-          headers: { Authorization: `Bearer ${token}` },
+          folder_id: selectedFolder,
+          file_id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
-
-      setFiles(files.filter((file) => file._id !== file_id));
-      setDeletebutton(false);
-      // setAlert( "success",  "success", "File deleted successfully." );
-      showAlert("success", "success", "File deleted successfully.");
-      // console.log(response.data.message || "File deleted successfully.");
-      fetchFiles();
-      setSelectedFileId(null);
-      // setDeletebutton(false);
+  
+      if (response.status === 200 && response.data?.message === "File deleted successfully.") {
+        console.log("1");
+        setFiles(file.filter((file) => file._id !== file_id));
+        console.log("2");
+        setDeletebutton(false);
+        showAlert("success", "Success", response.data.message);
+        console.log(response.data.message);
+        fetchFiles();
+        setDeletebutton("");
+        setSelectedFileId(null);
+        
+      } else {
+        showAlert({
+          variant: "failed",
+          title: "Failed",
+          message: "Unexpected response. File not deleted.",
+        });
+        console.warn("Unexpected response format:", response);
+      }
     } catch (error) {
-      // console.log(error.response?.data?.message || "Error deleting file.");
       showAlert({
         variant: "failed",
         title: "Failed",
         message: error.response?.data?.message || "Error deleting file.",
       });
+      console.error("Delete error:", error);
     }
   };
+  
 
   const fetchFileContent = async (fileId) => {
     try {
@@ -2054,44 +2047,44 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery }) => {
 
   const shareFile = async (fileId) => {
     if (!selectedEmails.length) {
-      // showAlert({ variant: "warning", title: "Please Select Email", message: "No designees selected" });
       showAlert("warning", "Please Select Email ", "No designees selected");
-
-      // console.error("No designees selected.");
       return;
     }
-
+  
     const token = localStorage.getItem("token");
-    // console.log("token", token);
-    // console.log("notify", notify);
-    // console.log("to_email_id", selectedEmails);
-    // console.log("file_ids before check", fileId);  // Debugging the fileId here
-    // console.log("file_id before check", file);  // Debugging the fileId here
-
+    console.log("to_email_id", selectedEmails);
+    console.log("file_ids before check", fileId);
+  
     if (!selectedEmails || !token || !fileId || fileId.length === 0) {
- showAlert(
-        "warning",
-        "warning ",
-        "there is no file to share"
-      );      return;
+      showAlert("warning", "Warning", "There is no file to share");
+      return;
     }
+  
     showLoading();
-    // Ensure fileId is an array
-    const filesToShare = Array.isArray(fileId) ? fileId : [fileId];
-
-    // console.log("Files to share", filesToShare);  // Debugging the final files array
-
+  
+    let filesToShare = [];
+  
+    if (Array.isArray(fileId)) {
+      filesToShare = fileId;
+    } else if (fileId?.files && Array.isArray(fileId.files)) {
+      filesToShare = fileId.files.map((f) => f._id);
+    } else if (fileId?._id) {
+      filesToShare = [fileId._id];
+    }
+  
+    console.log("Files to share after clean-up", filesToShare);
+  
     const data = {
-      file_id: filesToShare, // Single file ID
-      to_email_id: selectedEmails, // Array of emails
-      access: "view", // Adjust as needed
+      file_id: filesToShare,
+      to_email_id: selectedEmails,
+      access: "view",
       notify: notify,
-      message: message, // Optional, include if notifications are needed
+      message: message,
     };
-    // console.log("data before check", data);  // Debugging the fileId here
+  
     try {
       const response = await axios.post(
-        `${API_URL}/api/designee/share-files`, // Backend endpoint
+        `${API_URL}/api/designee/share-files`,
         data,
         {
           headers: {
@@ -2099,31 +2092,43 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery }) => {
           },
         }
       );
-      // showAlert({ variant: "success", title: "File Shared", message: "The file has been shared successfully!" });
-      showAlert(
-        "success",
-        "Success ",
-        "The file has been shared successfully."
-      );
-      // Handle the response, if needed
-      // console.log("File shared successfully:", response.data);
-      // const [shareFolderModal, setShareFolderModal] = useState(false);
+  
+      console.log("responsee after sharing", response);
+  
+      const results = response.data?.results || [];
+  
+      const skipped = results.filter((r) => r.status === "skipped");
+      const successful = results.filter((r) => r.status !== "skipped");
+  
+      if (successful.length > 0) {
+        showAlert("success", "Success", "The file has been shared successfully.");
+      }
+  
+      if (skipped.length > 0) {
+        const skippedFiles = [...new Set(skipped.map((s) => s.voice_id || s.file_id))];
+        const skippedEmails = [...new Set(skipped.map((s) => s.email))];
+        showAlert(
+          "error",
+          "Already Shared",
+          `These files were already shared with: ${skippedEmails.join(", ")}`
+        );
+      }
+  
       setShareFolderModal(false);
       fetchFiles();
     } catch (error) {
-      // showAlert({ variant: "error", title: "Sharing Failed", message: "An error occurred while sharing the file. Please try again." });
       showAlert(
         "error",
-        "Sharing Failed ",
+        "Sharing Failed",
         "An error occurred while sharing the file. Please try again."
       );
-
-      // console.error("Error sharing file:", error);
+      console.error("Error sharing file:", error);
     } finally {
       hideLoading();
     }
   };
-
+  
+  
   // const shareFile = async (file_id) => {
   //   const storedUser = localStorage.getItem("user");
   //   const storedEmail = localStorage.getItem("email");
@@ -4340,7 +4345,7 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery }) => {
               {people.map((person, index) => (
                 <div className="flex items-center mt-2" key={index}>
                   <img
-                    src="https://placehold.co/40x40"
+                       src={defaultprofile}
                     alt={`Profile picture of ${person.name}`}
                     className="w-10 h-10 rounded-full mr-3"
                   />
@@ -4666,7 +4671,7 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery }) => {
                   if (selectedFileId) {
                     // console.log("if statement deleating file");
                     deleteFile(selectedFileId);
-                    setDeletebutton(false);
+                    // setDeletebutton(false);
                   } else {
                     // console.log("if statement deleating folder");
                     handleDeleteFolder(
@@ -4915,8 +4920,8 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery }) => {
                   >
                     <div className="flex items-center">
                       <img
-                        src={user.avatar}
-                        alt="User avatar"
+                        src={defaultprofile}
+                        // alt="User avatar"
                         className="w-12 h-12 rounded-full mr-4"
                       />
 
@@ -4988,7 +4993,7 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery }) => {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center">
                     <img
-                      alt="User avatar"
+                      src={defaultprofile}
                       className="w-12 h-12 rounded-full mr-4"
                     />
                     <div>
