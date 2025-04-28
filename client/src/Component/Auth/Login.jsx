@@ -155,15 +155,15 @@ const Login = ({ name = "Daniel" }) => {
             });
     console.log("1",response);
             if (response.status === 200) {
-                console.log("2");
+                // console.log("2");
                 localStorage.setItem("token", token);
                 localStorage.setItem("user", username);
                 navigate("/folder/1"); 
-                console.log("4");
+                // console.log("4");
                 setError(""); // Clear error message
                 // navigate("/folder/1"); 
             } else {
-                console.log("3");
+                // console.log("3");
                 setError(response.data.message || "Failed to verify OTP.");
             }
         } catch (err) {
@@ -227,7 +227,7 @@ const Login = ({ name = "Daniel" }) => {
             }
     
             const data = await response.json();
-            console.log("API Response:", data);
+            // console.log("API Response:", data);
             setUsersData(data);
             localStorage.clear();
 
@@ -237,7 +237,7 @@ const Login = ({ name = "Daniel" }) => {
             localStorage.setItem("email", data.user.email);
             localStorage.setItem("userId", data.user.user_id);
             const storedRole = localStorage.getItem("role");
-            console.log("role:",storedRole );
+            // console.log("role:",storedRole );
             // if (data.user.roles[0].roleName === "Admin") {
             //     navigate("/admin/", { replace: true });
             // }else {
@@ -332,7 +332,7 @@ const Login = ({ name = "Daniel" }) => {
     
 
     const sendOtpWithTwilio = async () => {
-        console.log("Payload:", { phone_number: `${countryCode}${phoneNumber}` });
+        // console.log("Payload:", { phone_number: `${countryCode}${phoneNumber}` });
     
         if (!phoneNumber || phoneNumber.trim() === '') {
             alert('Phone number is required.');
@@ -341,7 +341,7 @@ const Login = ({ name = "Daniel" }) => {
     
         // setLoading(true);
         try {
-            console.log("Sending OTP...");
+            // console.log("Sending OTP...");
     
             const payload = { phoneNumber: `${countryCode}${phoneNumber}` };
     
@@ -351,7 +351,7 @@ const Login = ({ name = "Daniel" }) => {
                 },
             });
     
-            console.log("Response received:", response);
+            // console.log("Response received:", response);
     
             if (response.data.success) {
                 setMessage('OTP sent successfully!');
@@ -360,7 +360,7 @@ const Login = ({ name = "Daniel" }) => {
                 setMessage(`Error: ${response.data.phone_number || 'Unknown error.'}`);
             }
         } catch (error) {
-            console.error("Error sending OTP:", error);
+            // console.error("Error sending OTP:", error);
             setMessage('Something went wrong.');
         } finally {
             // setLoading(false);
@@ -369,11 +369,11 @@ const Login = ({ name = "Daniel" }) => {
 
 
     const verifyOTP = async () => { 
-        console.log("otp", otp);
-        console.log("phone", `${countryCode}${phoneNumber}`);
+        // console.log("otp", otp);
+        // console.log("phone", `${countryCode}${phoneNumber}`);
 
         if (!otp || !phoneNumber) {
-          console.error("Missing OTP or Phone Number");
+          // console.error("Missing OTP or Phone Number");
           alert("OTP and phone number are required!");
           return;
         }
@@ -384,7 +384,7 @@ const Login = ({ name = "Daniel" }) => {
           otp: otp.toString().trim()
       };
 
-      console.log("Request Body:", requestBody);
+      // console.log("Request Body:", requestBody);
     
         // Making the POST request using axios
         const response = await axios.post(`${API_URL}/api/otp/verify-otp`, requestBody, {
@@ -395,7 +395,7 @@ const Login = ({ name = "Daniel" }) => {
         
         // Directly access the response data
         const data = response.data;
-        console.log("response",data);
+        // console.log("response",data);
         if (data.success) {
         setMessage('Phone number verified successfully!');
             await updatePhoneNumber();
@@ -508,7 +508,7 @@ const Login = ({ name = "Daniel" }) => {
             }
         } catch (error) {
             // Handle any network or unexpected errors
-            console.error("Error details:", error);
+            // console.error("Error details:", error);
             setMessage(error.message || "Failed to update phone number.");
         }
     };

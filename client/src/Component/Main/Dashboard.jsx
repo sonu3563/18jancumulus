@@ -1351,6 +1351,7 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery }) => {
     // console.log(`used storage ${folderSize.value} ${folderSize.unit}`);
     // console.log("total  storage",storageData);
     // console.log("total  storageData1",storageData1);
+    console.log("Files before upload:", selectedFile);
 
     const totalFileSize = selectedFile.reduce(
       (acc, file) => acc + file.size,
@@ -1432,6 +1433,20 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery }) => {
       setUploadStatus("Please select files.");
       return;
     }
+
+
+// ❌ Check if any file exceeds 5MB
+const oversizedFile = selectedFile.find(file => file.size > 2 * 1024 * 1024);
+// if (oversizedFile) {
+//   showAlert(
+//     "error",
+//     "File Too Large",
+//     `The file "${oversizedFile.name}" exceeds the 5MB limit. Please upload a smaller file.`
+//   );
+//   return;
+// }
+
+
 
     const folderToUpload = selectedFolderId || folderId;
     if (!folderToUpload || folderToUpload === "1" || folderToUpload === "0") {
@@ -1627,7 +1642,12 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery }) => {
     setUploadQueue((prevQueue) =>
       prevQueue.filter((file) => file.id !== fileId)
     );
+  
+    setSelectedFile((prevSelected) =>
+      prevSelected.filter((file) => file.id !== fileId)
+    );
   };
+  
 
   const extractFileExtension = (fileName) => {
     const extension = fileName.split(".").pop(); // Extracts file extension
@@ -4063,7 +4083,6 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery }) => {
                           >
                             Edit
                           </button>
-
                           <button
                             className="text-red-500 hover:underline"
                             onClick={() => handleDeleteFile(file.name)}
@@ -4137,7 +4156,11 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery }) => {
               </>
 
               <button
-                onClick={() => clear()}
+                onClick={() => {
+              fetchFiles();
+              fetchFolders();
+              clear()
+            }}
                 className=" border-dashed border-2 border-blue-500 text-blue-700 px-4 py-2 rounded hover:bg-blue-500 hover:text-white"
               >
                 Cancel

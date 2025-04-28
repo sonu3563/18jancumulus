@@ -112,7 +112,7 @@ const Sidebar = ({ onFolderSelect }) => {
   const getUserData = async () => {
     try {
         const data = await fetchUserData();
-        console.log("Fetched user data:", data);
+        // console.log("Fetched user data:", data);
 
         if (!data?.user) {
             console.error("Invalid user data structure");
@@ -120,12 +120,12 @@ const Sidebar = ({ onFolderSelect }) => {
         }
 
         // ✅ Log membership details
-        console.log("User memberships:", data.memberships);
+        // console.log("User memberships:", data.memberships);
 
         // Extract latest membership details
         if (Array.isArray(data.memberships) && data.memberships.length > 0) {
             const latestMembership = data.memberships[data.memberships.length - 1];
-            console.log("Latest Membership:", latestMembership);
+            // console.log("Latest Membership:", latestMembership);
 
             const subscription = latestMembership?.subscription_id;
             if (subscription) {
@@ -140,13 +140,13 @@ const Sidebar = ({ onFolderSelect }) => {
                     planPrice = "Custom Pricing";
                 }
 
-                console.log("Subscription Plan:", subscription.subscription_name);
-                console.log("Plan Type:", planType);
-                console.log("Plan Price:", planPrice);
+                // console.log("Subscription Plan:", subscription.subscription_name);
+                // console.log("Plan Type:", planType);
+                // console.log("Plan Price:", planPrice);
 
                 // Check for 'heritage' details in the membership object
                 if (latestMembership.subscription_id.heritageDetails) {
-                    console.log("Heritage Details:", latestMembership.subscription_id.heritageDetails);
+                    // console.log("Heritage Details:", latestMembership.subscription_id.heritageDetails);
 
                     // Get the first heritage details item (assuming there's only one)
                     const heritageData = latestMembership.subscription_id.heritageDetails[0];
@@ -161,22 +161,22 @@ const Sidebar = ({ onFolderSelect }) => {
                     const storageAvailable = heritageData.storage ? `Storage: ${heritageData.storage} GB` : "No storage data available";
 
                     // Log the heritage plan data
-                    console.log("Storing Google Drive Data:", googleDriveData);
-                    console.log("Storing Dropbox Data:", dropboxData);
-                    console.log(storageAvailable);
-                    console.log(voiceMemoEnabled);
+                    // console.log("Storing Google Drive Data:", googleDriveData);
+                    // console.log("Storing Dropbox Data:", dropboxData);
+                    // console.log(storageAvailable);
+                    // console.log(voiceMemoEnabled);
 
                     // Set separate states for Google Drive, Dropbox, storage, and voice memo
                     setGoogleDriveData(googleDriveData);
                     setDropboxData(dropboxData);
                     setStorageData(storageAvailable);
                     setVoiceMemoData(voiceMemoEnabled);
-                    console.log("googleDriveData", googleDriveData);
-                    console.log("voiceMemoData", voiceMemoEnabled); // Log updated value
-                    console.log("dropboxData", dropboxData);
-                    console.log("storageAvailable", storageAvailable);
+                    // console.log("googleDriveData", googleDriveData);
+                    // console.log("voiceMemoData", voiceMemoEnabled); // Log updated value
+                    // console.log("dropboxData", dropboxData);
+                    // console.log("storageAvailable", storageAvailable);
                 } else {
-                    console.log("No heritage details found for the latest membership.");
+                    // console.log("No heritage details found for the latest membership.");
                 }
 
                 setPlan(subscription.subscription_name);
@@ -184,13 +184,13 @@ const Sidebar = ({ onFolderSelect }) => {
                 setPlanPrice(planPrice);
             }
         } else {
-            console.warn("No membership found.");
+            // console.warn("No membership found.");
         }
 
 
 
     } catch (err) {
-        console.error("Error fetching user data:", err.message || err);
+        // console.error("Error fetching user data:", err.message || err);
     }
 };
   

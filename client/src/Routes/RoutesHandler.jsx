@@ -19,7 +19,7 @@ import AdminRoute from '../layout/AdminRoute';
 const PrivateRoute = ({ element, allowedRoles }) => {
   const role = localStorage.getItem("role");
 
-  console.log("Checking PrivateRoute, role:", role); // Debugging
+  // console.log("Checking PrivateRoute, role:", role); // Debugging
 
   if (!role) {
     return <Navigate to="/login" replace />;
