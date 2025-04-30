@@ -352,6 +352,19 @@ router.delete("/remove-designee", authenticateToken, async (req, res) => {
     if (!designee) {
       return res.status(404).json({ message: "Designee not found." });
     }
+    // Check in UserSharedFileSchema if there are any files or voices shared with this designee
+    const sharedRecord = await UserSharedFile.findOne({
+      from_user_id: user_id,
+      to_email_id: email,
+    });
+    if (sharedRecord) {
+      if ((sharedRecord.files && sharedRecord.files.length > 0) || (sharedRecord.voices && sharedRecord.voices.length > 0)) {
+        return res.status(400).json({ 
+          message: "Please remove shared files and voice memos before deleting the designee." 
+        });
+      }
+    }
+    
     // Remove the user_id from the from_user_id array
     const updatedFromUserId = designee.from_user_id.filter(
       (id) => id.toString() !== user_id.toString()

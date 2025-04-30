@@ -2881,7 +2881,7 @@ const oversizedFile = selectedFile.find(file => file.size > 2 * 1024 * 1024);
                                />
                                <button
                                  className="text-blue-500 hover:text-blue-700 px-3 py-1 bg-gray-100 rounded-md bg-transparent"
-                                 onClick={() => {
+                                 onMouseDown={() => {
                                    handleEditFolder(
                                      item._id,
                                      editedFolderNames,
@@ -2987,6 +2987,7 @@ const oversizedFile = selectedFile.find(file => file.size > 2 * 1024 * 1024);
                                     className="relative group flex items-center gap-2 text-gray-600 hover:text-blue-500"
                                     onClick={() => {
                                       setEditFileId(item._id);
+                                      setEditedFolderNames(item.folder_name);
                                       setTempFName(item.file_name);
                                     }}
                                   >
@@ -3141,7 +3142,7 @@ const oversizedFile = selectedFile.find(file => file.size > 2 * 1024 * 1024);
                                   />
                                   <button
                                     className="text-blue-500 hover:text-blue-700 px-3 py-1 bg-gray-100 rounded-md bg-transparent"
-                                    onClick={() => handleSaveFName(file._id)} // Save on button click
+                                    onMouseDown={() => handleSaveFName(file._id)} // Save on button click
                                   >
                                     Save
                                   </button>

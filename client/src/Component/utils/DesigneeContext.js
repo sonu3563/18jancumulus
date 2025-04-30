@@ -113,7 +113,7 @@ export const DesigneeProvider = ({ children }) => {
   };
 
 
-  const deletedesignee = async (email,showAlert,setOpenEdit,setShowwarning) => {
+  const deletedesignee = async (email, showAlert, setOpenEdit, setShowwarning) => {
     const token = localStorage.getItem("token");
     try {
       const response = await axios.delete(
@@ -122,12 +122,18 @@ export const DesigneeProvider = ({ children }) => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-          data: { email },
+          data: { email }, // The email is sent correctly as part of the body
         }
       );
-      showAlert("success", "Success", response.data.message || "Designee removed successfully!");
-    //   await fetchDesignees();  // notice await — to ensure it finishes before moving on
-      await fetchdesignes();
+      
+      // Check for the specific message and show it in the alert
+      if (response.data.message === "Please remove shared files and voice memos before deleting the designee.") {
+        showAlert("warning", "Warning", response.data.message);
+      } else {
+        showAlert("success", "Success", response.data.message || "Designee removed successfully!");
+      }
+  
+      await fetchdesignes(); // Refresh the list of designees
     } catch (error) {
       console.error("Error deleting designee:", error);
       showAlert("error", "Failed", "Failed to remove designee.");
@@ -136,6 +142,7 @@ export const DesigneeProvider = ({ children }) => {
       setShowwarning(false);
     }
   };
+  
 
 
   
