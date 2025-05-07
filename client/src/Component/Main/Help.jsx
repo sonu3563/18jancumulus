@@ -151,7 +151,7 @@ const Help = () => {
   };
  
   const handleEmailClick = () => {
-    const email = "cumulus545@gmail.com"; 
+    const email = "support@cumulus.rip"; 
     const subject = "Request Query";
     const body = ""; 
     

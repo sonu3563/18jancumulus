@@ -15,12 +15,14 @@ const sendEmail = async (data) => {
         port: 465, // For SSL
         secure: true,
         auth: {
-          user: "cumulus545@gmail.com",
-          pass: "capr cvjb vrxf ygbt",
+        //   user: "cumulus545@gmail.com",
+        //   pass: "capr cvjb vrxf ygbt",
+        user: "support@cumulus.rip",
+        pass: "capr cvjb vrxf ygbt",
         },
       });
       const mailOptions = {
-        from: '"Cumulus" <cumulus545@gmail.com>',
+        from: '"Cumulus-rip" <support@cumulus.rip>',
         to: data.to,           // recipient's email
         subject: data.subject, // subject line
         html: data.body,       // HTML body
@@ -45,13 +47,13 @@ const sendQuestionEmail = async (query, userEmail) => {
             port: 465, // For SSL
             secure: true,
             auth: {
-                user: "cumulus545@gmail.com", // Your email
+                user: "support@cumulus.rip", // Your email
                 pass: "capr cvjb vrxf ygbt", // Replace with your actual app password
             },
         });
         const mailOptions = {
             from: `"${userEmail}" <${userEmail}>`, // Use logged-in user's email
-            to: "cumulus545@gmail.com", // Replace with your email
+            to: "support@cumulus.rip", // Replace with your email
             subject: `New Query from ${userEmail}`,
             text: `You have received a new query:\n\n${query}`,
         };
