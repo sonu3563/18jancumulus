@@ -670,9 +670,18 @@ const Dashboard = ({ folderId, onFolderSelect, searchQuery }) => {
   }, [plan]);
 
   const handleClick = () => {
-    // console.log("file hdbjcbhbckdnchbcb", file);
-    shareFile(files); // Calling the share function after setting the file ID
+    console.log("files id", file);
+  
+    // Check if 'file' is not null and not an empty array or object
+    if (file && (Array.isArray(file) ? file.length > 0 : Object.keys(file).length > 0)) {
+      console.log("1");
+      shareFile(file); // Calling the share function after setting the file ID
+    } else {
+      console.log("2");
+      shareFile(files);
+    }
   };
+  
 
   const handleUsersClick = (fileId) => {
     setShareFileVisible((prevId) => (prevId === fileId ? null : fileId)); // Toggle visibility
@@ -1698,9 +1707,9 @@ const oversizedFile = selectedFile.find(file => file.size > 2 * 1024 * 1024);
       );
   
       if (response.status === 200 && response.data?.message === "File deleted successfully.") {
-        console.log("1");
+        // console.log("1");
         setFiles(file.filter((file) => file._id !== file_id));
-        console.log("2");
+        // console.log("2");
         setDeletebutton(false);
         showAlert("success", "Success", response.data.message);
         console.log(response.data.message);
@@ -2066,6 +2075,7 @@ const oversizedFile = selectedFile.find(file => file.size > 2 * 1024 * 1024);
   }, []);
 
   const shareFile = async (fileId) => {
+    console.log("sharefile with ids",fileId)
     if (!selectedEmails.length) {
       showAlert("warning", "Please Select Email ", "No designees selected");
       return;
@@ -2090,7 +2100,10 @@ const oversizedFile = selectedFile.find(file => file.size > 2 * 1024 * 1024);
       filesToShare = fileId.files.map((f) => f._id);
     } else if (fileId?._id) {
       filesToShare = [fileId._id];
+    } else if (typeof fileId === "string") {
+      filesToShare = [fileId];  // <-- Added this line to handle string IDs
     }
+    
   
     console.log("Files to share after clean-up", filesToShare);
   
@@ -2145,6 +2158,8 @@ const oversizedFile = selectedFile.find(file => file.size > 2 * 1024 * 1024);
       console.error("Error sharing file:", error);
     } finally {
       hideLoading();
+      setFile('');
+      setShareFolderModal('');
     }
   };
   

@@ -67,13 +67,14 @@ const RoutesHandler = () => {
     <Routes>
       {/* Public Routes */}
       <Route path="/" element={<Hero />} />
-      <Route path="/terms" element={<Terms />} />
-      <Route path="/privacy" element={<Privacy />} />
+      {/* <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} /> */}
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/updatepassword" element={<Updatepassword />} />
       <Route path="/thankyou" element={<Thankyou />} />
       <Route path="/shared*" element={<PublicLayout />} />
+
       {/* <Route path="/Terms.html" element={<TermsPage />} />
       <Route path="/privacy.html" element={<PrivacyPage />} /> */}
 

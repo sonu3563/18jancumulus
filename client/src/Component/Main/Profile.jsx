@@ -624,6 +624,11 @@ const sendOtpWithTwilio = async () => {
       updateCloudConnections("", "", true, access_token);
 
       setIsConnected(true);
+      showAlert(
+        "success",
+        "Connected",
+        "Drop box is connected succesfully"
+      );
       const accessToken = localStorage.getItem("dropboxAccessToken");
       // console.log("acccessssstokeeennn",accessToken);
     } catch (error) {
@@ -668,6 +673,11 @@ const sendOtpWithTwilio = async () => {
 
       // console.log("Cloud connections updated successfully:", response.data);
       getUserData();
+      showAlert(
+        "success",
+        "Connected",
+        "Google drive is connected succesfully"
+      );
     } catch (error) {
       // console.error("Error updating cloud connections:", error.response ? error.response.data : error.message);
       getUserData();
@@ -682,6 +692,11 @@ const sendOtpWithTwilio = async () => {
     // console.log("dropbox");
     // localStorage.removeItem("dropboxToken");
     updateCloudConnections("", "", false, "");
+    showAlert(
+      "success",
+      "Disconnected Successfully",
+      "dropbox Disconnected Successfully"
+    );
     // setIsConnected(false);
     // getUserData();
   };
@@ -690,6 +705,11 @@ const sendOtpWithTwilio = async () => {
     // console.log("drive");
     // localStorage.removeItem("googleDriveToken");
     updateCloudConnections(false, "", "", "");
+    showAlert(
+      "success",
+      "Disconnected Successfully",
+      "Google Drive Disconnected Successfully"
+    );
     // setIsGoogleConnected(false);
     // getUserData();
   };

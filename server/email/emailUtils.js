@@ -18,7 +18,7 @@ const sendEmail = async (data) => {
         //   user: "cumulus545@gmail.com",
         //   pass: "capr cvjb vrxf ygbt",
         user: "support@cumulus.rip",
-        pass: "capr cvjb vrxf ygbt",
+        pass: "ijxk fenl onyf txcb",
         },
       });
       const mailOptions = {
@@ -48,7 +48,7 @@ const sendQuestionEmail = async (query, userEmail) => {
             secure: true,
             auth: {
                 user: "support@cumulus.rip", // Your email
-                pass: "capr cvjb vrxf ygbt", // Replace with your actual app password
+                pass: "ijxk fenl onyf txcb",
             },
         });
         const mailOptions = {

@@ -136,7 +136,7 @@ export const DesigneeProvider = ({ children }) => {
       await fetchdesignes(); // Refresh the list of designees
     } catch (error) {
       console.error("Error deleting designee:", error);
-      showAlert("error", "Failed", "Failed to remove designee.");
+      showAlert("error", "Failed", "Please make sure not file is shared with this designee before deleting");
     } finally {
       setOpenEdit(null);
       setShowwarning(false);

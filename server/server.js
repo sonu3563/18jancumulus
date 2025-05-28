@@ -26,6 +26,9 @@ const adminRoutes = require('./routes/adminRoutes');
 const app = express();
 const PORT = 3000;
 
+app.use(express.static(path.join(__dirname, 'public')));
+
+
 // app.use('/api/payment', express.raw({ type: 'application/json' }));
 app.use('/api/payment', stripeWebhook);
 app.use(express.json());
@@ -71,6 +74,15 @@ app.use("/api/gain-access", securitypassRoutes);
 app.use("/admin", adminRoutes);
 
 
+app.get('/Terms', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'Terms.html'));
+});
+
+app.get('/privacy', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'privacy.html'));
+});
+
+
 const DB_URI = process.env.DB_URI;
 mongoose
   .connect(DB_URI)
@@ -81,23 +93,6 @@ mongoose
   });
 
 
-  // const buildPath = path.join(__dirname, 'build');
-  // app.use(express.static(buildPath));
-  
-  // // Serve Terms.html and privacy.html directly
-  // app.get('/Terms.html', (req, res) => {
-  //   res.sendFile(path.join(buildPath, 'Terms.html'));
-  // });
-  
-  // app.get('/privacy.html', (req, res) => {
-  //   res.sendFile(path.join(buildPath, 'privacy.html'));
-  // });
-  
-  // // Fallback for React SPA routing
-  // app.get('*', (req, res) => {
-  //   res.sendFile(path.join(buildPath, 'index.html'));
-  // });
-  
 
 
 app.listen(PORT, '0.0.0.0', () => console.log(`Server running on https://www.cumulus.rip:${PORT}`));
